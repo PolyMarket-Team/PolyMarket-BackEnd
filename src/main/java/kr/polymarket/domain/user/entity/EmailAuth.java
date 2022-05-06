@@ -6,7 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 
 @Entity
-@Table(name = "EMAIL")
+@Table(name = "email")
 @Builder
 @Getter
 @Setter
