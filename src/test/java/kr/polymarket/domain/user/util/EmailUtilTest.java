@@ -1,5 +1,6 @@
 package kr.polymarket.domain.user.util;
 
+import kr.polymarket.global.config.AsyncConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import static org.awaitility.Awaitility.await;
 /**
  * Email Util 테스트
  */
-@SpringBootTest(classes = {EmailUtilTest.AsyncTestConfig.class, MailSenderAutoConfiguration.class, JavaMailSender.class, EmailUtil.class})
+@SpringBootTest(classes = {EmailUtilTest.AsyncTestConfig.class, AsyncConfig.class, MailSenderAutoConfiguration.class, JavaMailSender.class, EmailUtil.class})
 @Slf4j
 public class EmailUtilTest {
 

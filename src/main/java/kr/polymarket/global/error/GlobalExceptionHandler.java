@@ -110,12 +110,8 @@ public class GlobalExceptionHandler {
                             .text(request.getHeader("X-Forwarded-For") == null? request.getRemoteAddr() : request.getHeader("X-Forwarded-For") + "(proxy by nginx)")
                             .build(),
                     SlackWebhookCustomField.builder()
-                            .label("Host")
-                            .text(request.getRemoteHost())
-                            .build(),
-                    SlackWebhookCustomField.builder()
-                            .label("Request URI")
-                            .text(request.getRequestURI())
+                            .label("Request URL")
+                            .text(request.getRequestURL().toString())
                             .build(),
                     SlackWebhookCustomField.builder()
                             .label("Error Log")
