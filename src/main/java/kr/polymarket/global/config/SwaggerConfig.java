@@ -72,6 +72,7 @@ public class SwaggerConfig {
             private List<RequestMappingInfoHandlerMapping> getHandlerMappings(Object bean) {
                 try {
                     Field field = ReflectionUtils.findField(bean.getClass(), "handlerMappings");
+                    assert field != null;
                     field.setAccessible(true);
                     return (List<RequestMappingInfoHandlerMapping>) field.get(bean);
                 } catch (IllegalArgumentException | IllegalAccessException e) {
