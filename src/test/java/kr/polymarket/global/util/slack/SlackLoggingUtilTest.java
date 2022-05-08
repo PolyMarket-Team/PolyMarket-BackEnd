@@ -88,7 +88,7 @@ public class SlackLoggingUtilTest {
                         .text("this is a test error msg")
                         .build()
         );
-        final int REQUEST_NUM = 20;
+        final int REQUEST_NUM = 100;
         CountDownLatch countDownLatch = new CountDownLatch(REQUEST_NUM);
 
         // when

@@ -27,7 +27,7 @@ public class SlackLoggingUtil {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    private final static String API_DEV_LOGGING_CHANNEL_WEBHOOK_URL = "https://hooks.slack.com/services/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";
+    private final static String API_DEV_LOGGING_CHANNEL_WEBHOOK_URL = "https://hooks.slack.com/services/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";
 
     /**
      * 슬랙 로깅 채널로 메시지를 보내는 메소드
