@@ -1,6 +1,7 @@
 package kr.polymarket.global.util.slack;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.polymarket.global.properties.SlackWebhookChannelProperty;
 import kr.polymarket.global.util.slack.model.SlackLoggingTargetType;
 import kr.polymarket.global.util.slack.model.SlackLoggingType;
 import kr.polymarket.global.util.slack.model.SlackWebhookCustomField;
@@ -26,8 +27,7 @@ public class SlackLoggingUtil {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-
-    private final static String API_DEV_LOGGING_CHANNEL_WEBHOOK_URL = "https://hooks.slack.com/services/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";
+    private final SlackWebhookChannelProperty slackWebhookChannelProperty;
 
     /**
      * 슬랙 로깅 채널로 메시지를 보내는 메소드
@@ -53,12 +53,11 @@ public class SlackLoggingUtil {
         String slackRequestStr = objectMapper.writeValueAsString(blockListReq);
         requestPayload.add("payload", slackRequestStr);
 
-        // TODO slackLoggingTargetType에 따라 알맞은 채널 uri로 요청을 보내도록 코드 추가
-        ResponseEntity<String> response = restTemplate.postForEntity(UriComponentsBuilder.fromHttpUrl(API_DEV_LOGGING_CHANNEL_WEBHOOK_URL).toUriString(),
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                UriComponentsBuilder.fromHttpUrl(slackLoggingTargetType.getWebhookChannelUrl()).toUriString(),
                 requestPayload, String.class);
 
         return response.getBody();
-
     }
 
     /**

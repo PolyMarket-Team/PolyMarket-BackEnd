@@ -1,6 +1,7 @@
 package kr.polymarket.global.util.slack;
 
 import kr.polymarket.global.config.AsyncConfig;
+import kr.polymarket.global.config.PropertiesConfig;
 import kr.polymarket.global.util.slack.model.SlackLoggingTargetType;
 import kr.polymarket.global.util.slack.model.SlackLoggingType;
 import kr.polymarket.global.util.slack.model.SlackWebhookCustomField;
@@ -23,7 +24,8 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {SlackLoggingUtil.class, RestTemplateAutoConfiguration.class, RestTemplate.class, AsyncConfig.class,
-    AsyncConfig.class, Executor.class, JacksonAutoConfiguration.class})
+    AsyncConfig.class, Executor.class, JacksonAutoConfiguration.class, PropertiesConfig.class,
+        SlackLoggingTargetType.SlackWebhookChannelPropertyInjector.class})
 @Slf4j
 public class SlackLoggingUtilTest {
 
@@ -57,13 +59,19 @@ public class SlackLoggingUtilTest {
                         .text("this is a test error msg")
                         .build()
         );
-
+        
         // when
-        String responseMessage = slackLoggingUtil.logToSlackWebhookChannel(SlackLoggingTargetType.API, SlackLoggingType.INFO,
+        String apiWebhookResponseMessage = slackLoggingUtil.logToSlackWebhookChannel(SlackLoggingTargetType.API, SlackLoggingType.INFO,
+                slackWebhookCustomFieldsList);
+        String frontWebhookResponseMessage = slackLoggingUtil.logToSlackWebhookChannel(SlackLoggingTargetType.FRONT, SlackLoggingType.INFO,
+                slackWebhookCustomFieldsList);
+        String mobileWebhookResponseMessage = slackLoggingUtil.logToSlackWebhookChannel(SlackLoggingTargetType.MOBILE, SlackLoggingType.INFO,
                 slackWebhookCustomFieldsList);
 
         // then
-        assertThat(responseMessage).isEqualTo(SLACK_WEBHOOK_SUCCESS_RESPONSE_TEXT);
+        assertThat(apiWebhookResponseMessage).isEqualTo(SLACK_WEBHOOK_SUCCESS_RESPONSE_TEXT);
+        assertThat(frontWebhookResponseMessage).isEqualTo(SLACK_WEBHOOK_SUCCESS_RESPONSE_TEXT);
+        assertThat(mobileWebhookResponseMessage).isEqualTo(SLACK_WEBHOOK_SUCCESS_RESPONSE_TEXT);
     }
 
     @Test
