@@ -1,17 +1,14 @@
 package kr.polymarket.domain.user.util;
 
+import kr.polymarket.global.config.AsyncConfig;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Description;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.time.Duration;
 import java.util.concurrent.Executor;
@@ -24,7 +21,7 @@ import static org.awaitility.Awaitility.await;
 /**
  * Email Util 테스트
  */
-@SpringBootTest(classes = {EmailUtilTest.AsyncTestConfig.class, MailSenderAutoConfiguration.class, JavaMailSender.class, EmailUtil.class})
+@SpringBootTest(classes = {AsyncConfig.class, MailSenderAutoConfiguration.class, JavaMailSender.class, EmailUtil.class})
 @Slf4j
 public class EmailUtilTest {
 
@@ -32,7 +29,7 @@ public class EmailUtilTest {
     private EmailUtil emailUtil;
 
     @Autowired
-    private Executor executor;
+    private Executor threadPoolTaskExecutor;
 
     @Autowired
     private JavaMailSender mailSender;
@@ -68,7 +65,7 @@ public class EmailUtilTest {
         // when
         AtomicInteger completeNum = new AtomicInteger(0);
         for (int i = 0; i < EMAIL_SEND_NUM; i++) {
-            executor.execute(() -> {
+            threadPoolTaskExecutor.execute(() -> {
                 emailUtil.send("polymarket.team@gmail.com", emailUtil.createCode(6));
                 completeNum.incrementAndGet();
             });
@@ -103,7 +100,7 @@ public class EmailUtilTest {
         // when
         AtomicInteger completeNum = new AtomicInteger(0);
         for(int i = 0; i < SEND_TIMES; i++) {
-            executor.execute(() -> {
+            threadPoolTaskExecutor.execute(() -> {
                 mailSender.send(simpleMailMessageArr);
                 completeNum.incrementAndGet();
             });
@@ -112,24 +109,6 @@ public class EmailUtilTest {
         // then
         await().atMost(Duration.ofSeconds(30))
                 .until(() -> completeNum.get() == EMAIL_SEND_NUM);
-    }
-
-
-    /**
-     * 스레드 풀 설정
-     */
-    @Configuration
-    static public class AsyncTestConfig {
-
-        @Bean
-        public Executor taskExecutor () {
-            ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-            executor.setCorePoolSize(10);
-            executor.setMaxPoolSize(10);
-            executor.setThreadNamePrefix("async-");
-            executor.initialize();
-            return executor;
-        }
     }
 
 }
