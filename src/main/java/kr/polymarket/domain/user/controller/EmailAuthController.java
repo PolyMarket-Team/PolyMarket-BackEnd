@@ -1,6 +1,7 @@
 package kr.polymarket.domain.user.controller;
 
 import kr.polymarket.domain.user.dto.EmailAuthDto;
+import kr.polymarket.domain.user.dto.EmailAuthResultDto;
 import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
 import kr.polymarket.domain.user.service.EmailAuthService;
 import kr.polymarket.global.result.ResultCode;
@@ -26,9 +27,9 @@ public class EmailAuthController {
      */
     @PostMapping("/send-email")
     public ResponseEntity<ResultResponse> emailSend(@RequestBody EmailAuthDto emailAuthDto) {
-        emailAuthService.sendEmail(emailAuthDto);
+        EmailAuthResultDto emailAuthResult = emailAuthService.sendEmail(emailAuthDto);
 
-        ResultResponse result = ResultResponse.of(ResultCode.EMAIL_SEND_SUCCESS, emailAuthDto);
+        ResultResponse result = ResultResponse.of(ResultCode.EMAIL_SEND_SUCCESS, emailAuthResult);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
     }
 
