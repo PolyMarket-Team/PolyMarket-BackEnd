@@ -14,6 +14,7 @@ import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.util.EmailUtil;
 import kr.polymarket.global.properties.AppProperty;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,12 +39,13 @@ public class EmailAuthService {
 
     private static final long EMAIL_AUTH_EXPIRE_TIME = Duration.ofMinutes(5).toSeconds();
     private static final String SERVER_STANDARD_TIMEZONE = "Asia/Seoul";
+    private static final int EMAIL_AUTH_CODE_LENGTH = 6;
 
     /**
      * 이메일 전송 및 임시 저장
      */
-    public EmailAuthResultDto sendEmail(EmailAuthDto emailAuthDto) {
-        String authCode = emailUtil.createCode(6);
+    public EmailAuthResultDto sendAuthCodeToEmail(EmailAuthDto emailAuthDto) {
+        String authCode = emailUtil.createCode(EMAIL_AUTH_CODE_LENGTH);
         signValidateDuplicated(emailAuthDto.getEmail());
 
         LocalDateTime expiredDateTime = ZonedDateTime.now(ZoneId.of(SERVER_STANDARD_TIMEZONE)).plus(5, ChronoUnit.MINUTES).toLocalDateTime();
@@ -75,7 +77,7 @@ public class EmailAuthService {
     /**
      * 이메일 인증 완료
      */
-    public void confirmEmail(EmailCodeRequestDto emailCodeRequestDto) {
+    public void confirmEmailAuthCode(EmailCodeRequestDto emailCodeRequestDto) {
 
         String emailAuthCode = redisTemplate.opsForValue().get(emailCodeRequestDto.getEmail());
 

@@ -26,8 +26,8 @@ public class EmailAuthController {
      * @param emailAuthDto
      */
     @PostMapping("/send-email")
-    public ResponseEntity<ResultResponse> emailSend(@RequestBody EmailAuthDto emailAuthDto) {
-        EmailAuthResultDto emailAuthResult = emailAuthService.sendEmail(emailAuthDto);
+    public ResponseEntity<ResultResponse> sendEmailAuthCode(@RequestBody EmailAuthDto emailAuthDto) {
+        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthDto);
 
         ResultResponse result = ResultResponse.of(ResultCode.EMAIL_SEND_SUCCESS, emailAuthResult);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
@@ -39,7 +39,7 @@ public class EmailAuthController {
      */
     @PostMapping("/confirm-email")
     public ResponseEntity<ResultResponse> confirmEmail(@RequestBody EmailCodeRequestDto emailCodeRequestDto) {
-        emailAuthService.confirmEmail(emailCodeRequestDto);
+        emailAuthService.confirmEmailAuthCode(emailCodeRequestDto);
 
         ResultResponse result = ResultResponse.of(ResultCode.CONFIRM_EMAIL_SUCCESS, emailCodeRequestDto);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));

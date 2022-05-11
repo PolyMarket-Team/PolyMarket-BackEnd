@@ -17,7 +17,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("users")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<ResultResponse> signin(@RequestBody LoginRequestDto loginRequestDto) {
+    public ResponseEntity<ResultResponse> signIn(@RequestBody LoginRequestDto loginRequestDto) {
         LoginResponseDto loginResponseDto = userAuthService.userSignIn(loginRequestDto);
 
         ResultResponse result = ResultResponse.of(ResultCode.SIGNIN_SUCCESS, loginResponseDto);
