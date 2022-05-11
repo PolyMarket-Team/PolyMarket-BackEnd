@@ -1,7 +1,6 @@
 package kr.polymarket.domain.user.controller;
 
-import kr.polymarket.domain.user.dto.LoginRequestDto;
-import kr.polymarket.domain.user.dto.SignUpDto;
+import kr.polymarket.domain.user.dto.*;
 import kr.polymarket.domain.user.service.UserAuthService;
 import kr.polymarket.domain.user.service.UserService;
 import kr.polymarket.global.result.ResultCode;
@@ -32,11 +31,17 @@ public class UserController {
 
     @PostMapping("/signin")
     public ResponseEntity<ResultResponse> signin(@RequestBody LoginRequestDto loginRequestDto) {
-        userAuthService.userSignIn(loginRequestDto);
+        LoginResponseDto loginResponseDto = userAuthService.userSignIn(loginRequestDto);
 
-        ResultResponse result = ResultResponse.of(ResultCode.SIGNIN_SUCCESS, loginRequestDto);
+        ResultResponse result = ResultResponse.of(ResultCode.SIGNIN_SUCCESS, loginResponseDto);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<ResultResponse> refresh(@RequestBody TokenRequestDto tokenRequestDto) {
+        TokenResponseDto tokenResponseDto = userAuthService.tokenRefresh(tokenRequestDto);
 
+        ResultResponse result = ResultResponse.of(ResultCode.REFRESH_SUCCESS, tokenResponseDto);
+        return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
+    }
 }
