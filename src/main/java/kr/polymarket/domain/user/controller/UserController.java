@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("users")
@@ -23,7 +25,7 @@ public class UserController {
     private final UserAuthService userAuthService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ResultResponse> signUp(@RequestBody SignUpDto signUpDto) {
+    public ResponseEntity<ResultResponse> signUp(@Valid @RequestBody SignUpDto signUpDto) {
         userService.createUser(signUpDto);
 
         ResultResponse result = ResultResponse.of(ResultCode.SIGNUP_SUCCESS, signUpDto);

@@ -66,6 +66,7 @@ public class UserService {
      * 이메일 인증여부 확인 메서드
      */
     public void verifyValidateDuplicated(String email) {
+        // TODO Null Point 체크, 앞단에서 유효성 검사
         if (emailRepository.findByEmail(email).get().getVerify() == Verify.EMAIL_CHECK_REQUIRE)
             throw new EmailAuthCodeNotFoundException();
     }
