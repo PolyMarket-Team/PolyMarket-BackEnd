@@ -1,6 +1,7 @@
 package kr.polymarket.domain.user.service;
 
 import kr.polymarket.domain.user.dto.EmailAuthDto;
+import kr.polymarket.domain.user.dto.EmailAuthResultDto;
 import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
 import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.entity.RedisKey;
@@ -11,54 +12,75 @@ import kr.polymarket.domain.user.exception.UserEmailAlreadyExistsException;
 import kr.polymarket.domain.user.repository.EmailRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.util.EmailUtil;
+import kr.polymarket.global.properties.AppProperty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 public class EmailAuthService {
 
     private final UserRepository userRepository;
     private final EmailRepository emailRepository;
     private final RedisService redisService;
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
     private final EmailUtil emailUtil;
+    private final AppProperty appProperty;
+
+    private static final long EMAIL_AUTH_EXPIRE_TIME = Duration.ofMinutes(5).toSeconds();
+    private static final String SERVER_STANDARD_TIMEZONE = "Asia/Seoul";
 
     /**
      * 이메일 전송 및 임시 저장
      */
-    @Transactional
-    public void sendEmail(EmailAuthDto emailAuthDto) {
+    public EmailAuthResultDto sendEmail(EmailAuthDto emailAuthDto) {
         String authCode = emailUtil.createCode(6);
         signValidateDuplicated(emailAuthDto.getEmail());
 
+        LocalDateTime expiredDateTime = ZonedDateTime.now(ZoneId.of(SERVER_STANDARD_TIMEZONE)).plus(5, ChronoUnit.MINUTES).toLocalDateTime();
+
+        EmailAuthResultDto emailAuthResult = EmailAuthResultDto.builder()
+                .email(emailAuthDto.getEmail())
+                .authCode("prod".equals(appProperty.getEnv())? null: authCode)
+                .expireDateTime(expiredDateTime)
+                .expireDateTimeZone(SERVER_STANDARD_TIMEZONE)
+                .build();
+
         //이메일 인증까지 완료 했지만 회원가입을 완료하지 않은 사람들 검증
-        if (emailRepository.existsByEmail(emailAuthDto.getEmail()) != false) {
-            redisService.setDataWithExpiration(RedisKey.CODE.getKey() + emailAuthDto.getEmail(), authCode, 60 * 5L);
+        if (emailRepository.existsByEmail(emailAuthDto.getEmail())) {
+            redisService.setDataWithExpiration(RedisKey.CODE.getKey() + emailAuthDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
             emailUtil.send(emailAuthDto.getEmail(), authCode);
+            return emailAuthResult;
         }
+
         emailValidateDuplicated(emailAuthDto.getEmail());
 
         //처음 인증받는 사람들 email DB저장 및 인증코드 전송
         EmailAuth emailAuth = emailAuthDto.createEmailAuth(emailAuthDto);
         emailRepository.save(emailAuth);
-        redisService.setDataWithExpiration(RedisKey.CODE.getKey() + emailAuthDto.getEmail(), authCode, 60 * 5L);
+        redisService.setDataWithExpiration(RedisKey.CODE.getKey() + emailAuthDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
         emailUtil.send(emailAuthDto.getEmail(), authCode);
+        return emailAuthResult;
     }
 
     /**
      * 이메일 인증 완료
      */
-    @Transactional
     public void confirmEmail(EmailCodeRequestDto emailCodeRequestDto) {
 
-        Object object = redisTemplate.opsForValue().get(emailCodeRequestDto.getEmail());
+        String emailAuthCode = redisTemplate.opsForValue().get(emailCodeRequestDto.getEmail());
 
         //인증코드가 만료되거나 인증코드 값이 같지 않으면 에러발생
-        if (object == null || !emailCodeRequestDto.getAuthCode().equals(object.toString())) {
+        if (!emailCodeRequestDto.getAuthCode().equals(emailAuthCode)) {
             throw new EmailAuthCodeNotFoundException();
         }
 

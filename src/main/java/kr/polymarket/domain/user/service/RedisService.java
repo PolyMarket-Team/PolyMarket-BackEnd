@@ -12,10 +12,10 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class RedisService {
 
-    public final RedisTemplate redisTemplate;
+    public final RedisTemplate<String, String> redisTemplate;
 
     public String getData(String key) {
-        return (String) redisTemplate.opsForValue().get(key);
+        return redisTemplate.opsForValue().get(key);
     }
 
     public void setDataWithExpiration(String key, String value, Long time) {
