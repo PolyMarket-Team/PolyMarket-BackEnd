@@ -6,16 +6,15 @@ import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
 import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.entity.RedisKey;
 import kr.polymarket.domain.user.exception.EmailAlreadySendException;
-import kr.polymarket.domain.user.exception.EmailAuthCodeNotFoundException;
+import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
 import kr.polymarket.domain.user.exception.EmailNotFoundException;
 import kr.polymarket.domain.user.exception.UserEmailAlreadyExistsException;
 import kr.polymarket.domain.user.repository.EmailRepository;
+import kr.polymarket.domain.user.repository.RedisRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.util.EmailUtil;
 import kr.polymarket.global.properties.AppProperty;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,8 +31,7 @@ public class EmailAuthService {
 
     private final UserRepository userRepository;
     private final EmailRepository emailRepository;
-    private final RedisService redisService;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisRepository redisRepository;
     private final EmailUtil emailUtil;
     private final AppProperty appProperty;
 
@@ -61,7 +59,7 @@ public class EmailAuthService {
         if (emailRepository.existsByEmail(emailAuthDto.getEmail())) {
             // TODO 회원가입은 안됐으나 이메일 인증코드를 보낸적이 있는 경우 이메일 재전송까지 시간제한을 걸지 여부 기획
 
-            redisService.setDataWithExpiration(RedisKey.CODE.getKey() + emailAuthDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
+            redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
             emailUtil.send(emailAuthDto.getEmail(), authCode);
             return emailAuthResult;
         }
@@ -69,7 +67,7 @@ public class EmailAuthService {
         //처음 인증받는 사람들 email DB저장 및 인증코드 전송
         EmailAuth emailAuth = emailAuthDto.createEmailAuth(emailAuthDto);
         emailRepository.save(emailAuth);
-        redisService.setDataWithExpiration(RedisKey.CODE.getKey() + emailAuthDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
+        redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
         emailUtil.send(emailAuthDto.getEmail(), authCode);
         return emailAuthResult;
     }
@@ -79,16 +77,16 @@ public class EmailAuthService {
      */
     public void confirmEmailAuthCode(EmailCodeRequestDto emailCodeRequestDto) {
 
-        String emailAuthCode = redisTemplate.opsForValue().get(emailCodeRequestDto.getEmail());
+        String emailAuthCode = redisRepository.getData(emailCodeRequestDto.getEmail());
 
         //인증코드가 만료되거나 인증코드 값이 같지 않으면 에러발생
         if (!emailCodeRequestDto.getAuthCode().equals(emailAuthCode)) {
-            throw new EmailAuthCodeNotFoundException();
+            throw new EmailAuthCodeAuthFailureException();
         }
 
         //인증이 완료되면 레디스에 저장된 정보를 삭제하고 이메일 상태변경
         EmailAuth emailAuth = emailRepository.findByEmail(emailCodeRequestDto.getEmail()).orElseThrow(EmailNotFoundException::new);
-        redisService.deleteData(RedisKey.CODE.getKey() + emailCodeRequestDto.getEmail());
+        redisRepository.deleteData(RedisKey.EMAIL_AUTH_CODE.getKey() + emailCodeRequestDto.getEmail());
         emailAuth.emailVerifiedSuccess();
     }
 

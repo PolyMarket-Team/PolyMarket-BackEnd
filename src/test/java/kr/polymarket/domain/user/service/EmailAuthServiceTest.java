@@ -2,9 +2,14 @@ package kr.polymarket.domain.user.service;
 
 import kr.polymarket.domain.user.dto.EmailAuthDto;
 import kr.polymarket.domain.user.dto.EmailAuthResultDto;
+import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
+import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.entity.User;
+import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
+import kr.polymarket.domain.user.exception.EmailNotFoundException;
 import kr.polymarket.domain.user.exception.UserEmailAlreadyExistsException;
 import kr.polymarket.domain.user.repository.EmailRepository;
+import kr.polymarket.domain.user.repository.RedisRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.util.EmailUtil;
 import kr.polymarket.global.properties.AppProperty;
@@ -35,7 +40,7 @@ public class EmailAuthServiceTest {
     private EmailRepository emailRepository;
 
     @Mock
-    private RedisService redisService;
+    private RedisRepository redisRepository;
 
     @Mock
     private EmailUtil emailUtil;
@@ -115,7 +120,6 @@ public class EmailAuthServiceTest {
                 .email(email)
                 .build();
 
-        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
         given(emailRepository.existsByEmail(email)).willReturn(false);
         given(appProperty.getEnv()).willReturn("prod");
         given(emailUtil.createCode(anyInt())).willReturn("123456");
@@ -126,5 +130,64 @@ public class EmailAuthServiceTest {
         // then
         assertThat(emailAuthResult.getEmail()).isEqualTo(email);
         assertThat(emailAuthResult.getAuthCode()).isNull();
+    }
+
+    @Test
+    void confirmEmailAuthCode_인증코드_일치x() {
+        // given
+        final String email = "test@email.com";
+        final String authCode = "123456";
+        final EmailCodeRequestDto emailCodeRequestDto = EmailCodeRequestDto.builder()
+                .email(email)
+                .authCode(authCode)
+                .build();
+
+        given(redisRepository.getData(email)).willReturn("WrongAuthCode");
+
+        // when
+        Throwable exception = catchThrowable(() -> emailAuthService.confirmEmailAuthCode(emailCodeRequestDto));
+
+        // then
+        assertThat(exception)
+                .isInstanceOf(EmailAuthCodeAuthFailureException.class);
+    }
+
+    @Test
+    void confirmEmailAuthCode_인증코드_일치o_이메일_존재x() {
+        // given
+        final String email = "test@email.com";
+        final String authCode = "123456";
+        final EmailCodeRequestDto emailCodeRequestDto = EmailCodeRequestDto.builder()
+                .email(email)
+                .authCode(authCode)
+                .build();
+
+        given(redisRepository.getData(email)).willReturn(authCode);
+
+        // when
+        Throwable exception = catchThrowable(() -> emailAuthService.confirmEmailAuthCode(emailCodeRequestDto));
+
+        // then
+        assertThat(exception)
+                .isInstanceOf(EmailNotFoundException.class);
+    }
+
+    @Test
+    void confirmEmailAuthCode_인증코드_일치o_이메일_존재o() {
+        // given
+        final String email = "test@email.com";
+        final String authCode = "123456";
+        final EmailCodeRequestDto emailCodeRequestDto = EmailCodeRequestDto.builder()
+                .email(email)
+                .authCode(authCode)
+                .build();
+
+        given(redisRepository.getData(email)).willReturn(authCode);
+        given(emailRepository.findByEmail(email)).willReturn(Optional.of(EmailAuth.builder().build()));
+
+        // when
+        emailAuthService.confirmEmailAuthCode(emailCodeRequestDto);
+
+        // then
     }
 }

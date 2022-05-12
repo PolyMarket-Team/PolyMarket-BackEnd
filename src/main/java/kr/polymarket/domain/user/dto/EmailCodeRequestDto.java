@@ -1,13 +1,12 @@
 package kr.polymarket.domain.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
-@NoArgsConstructor
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
 public class EmailCodeRequestDto {
-    String email;
-    String authCode;
+    private String email;
+    private String authCode;
 }
