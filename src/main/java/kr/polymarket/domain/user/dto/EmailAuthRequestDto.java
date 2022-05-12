@@ -1,6 +1,8 @@
 package kr.polymarket.domain.user.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sun.istack.NotNull;
 import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.entity.Verify;
@@ -8,22 +10,22 @@ import lombok.*;
 
 import javax.persistence.Column;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EmailAuthDto {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class EmailAuthRequestDto {
 
-    @NotNull
+    @NotBlank(message = "이메일이 빈칸입니다.")
     @Email(message = "이메일 형식이 맞지 않습니다")
-    @Column(unique = true)
     private String email;
 
-    public EmailAuth createEmailAuth(EmailAuthDto emailAuthDto){
+    public EmailAuth createEmailAuth(EmailAuthRequestDto emailAuthRequestDto){
         return EmailAuth.builder()
-                .email(emailAuthDto.getEmail())
+                .email(emailAuthRequestDto.getEmail())
                 .verify(Verify.EMAIL_CHECK_REQUIRE)
                 .build();
     }

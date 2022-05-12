@@ -1,6 +1,6 @@
 package kr.polymarket.domain.user.service;
 
-import kr.polymarket.domain.user.dto.EmailAuthDto;
+import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
 import kr.polymarket.domain.user.dto.EmailAuthResultDto;
 import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
 import kr.polymarket.domain.user.entity.EmailAuth;
@@ -8,7 +8,7 @@ import kr.polymarket.domain.user.entity.RedisKey;
 import kr.polymarket.domain.user.exception.EmailAlreadySendException;
 import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
 import kr.polymarket.domain.user.exception.EmailNotFoundException;
-import kr.polymarket.domain.user.exception.UserEmailAlreadyExistsException;
+import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
 import kr.polymarket.domain.user.repository.EmailRepository;
 import kr.polymarket.domain.user.repository.RedisRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
@@ -42,33 +42,33 @@ public class EmailAuthService {
     /**
      * 이메일 전송 및 임시 저장
      */
-    public EmailAuthResultDto sendAuthCodeToEmail(EmailAuthDto emailAuthDto) {
+    public EmailAuthResultDto sendAuthCodeToEmail(EmailAuthRequestDto emailAuthRequestDto) {
         String authCode = emailUtil.createCode(EMAIL_AUTH_CODE_LENGTH);
-        validateSignUpDuplicated(emailAuthDto.getEmail());
+        validateSignUpDuplicated(emailAuthRequestDto.getEmail());
 
         LocalDateTime expiredDateTime = ZonedDateTime.now(ZoneId.of(SERVER_STANDARD_TIMEZONE)).plus(5, ChronoUnit.MINUTES).toLocalDateTime();
 
         EmailAuthResultDto emailAuthResult = EmailAuthResultDto.builder()
-                .email(emailAuthDto.getEmail())
+                .email(emailAuthRequestDto.getEmail())
                 .authCode("prod".equals(appProperty.getEnv())? null: authCode)
                 .expireDateTime(expiredDateTime)
                 .expireDateTimeZone(SERVER_STANDARD_TIMEZONE)
                 .build();
 
         //이메일 인증까지 완료 했지만 회원가입을 완료하지 않은 사람들 검증
-        if (emailRepository.existsByEmail(emailAuthDto.getEmail())) {
+        if (emailRepository.existsByEmail(emailAuthRequestDto.getEmail())) {
             // TODO 회원가입은 안됐으나 이메일 인증코드를 보낸적이 있는 경우 이메일 재전송까지 시간제한을 걸지 여부 기획
 
-            redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
-            emailUtil.send(emailAuthDto.getEmail(), authCode);
+            redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
+            emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
             return emailAuthResult;
         }
 
         //처음 인증받는 사람들 email DB저장 및 인증코드 전송
-        EmailAuth emailAuth = emailAuthDto.createEmailAuth(emailAuthDto);
+        EmailAuth emailAuth = emailAuthRequestDto.createEmailAuth(emailAuthRequestDto);
         emailRepository.save(emailAuth);
-        redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
-        emailUtil.send(emailAuthDto.getEmail(), authCode);
+        redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
+        emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
         return emailAuthResult;
     }
 
@@ -95,7 +95,7 @@ public class EmailAuthService {
      */
     public void validateSignUpDuplicated(String email) {
         if (userRepository.findByEmail(email).isPresent())
-            throw new UserEmailAlreadyExistsException();
+            throw new UserAlreadySignUpException("이미 가입된 회원으로 인증 메일을 보낼 수 없습니다.");
     }
 
     /**
