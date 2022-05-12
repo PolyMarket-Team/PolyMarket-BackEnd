@@ -25,7 +25,6 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class EmailAuthService {
 
@@ -50,19 +49,22 @@ public class EmailAuthService {
         if (emailRepository.existsByEmail(emailAuthRequestDto.getEmail())) {
             // TODO 회원가입은 안됐으나 이메일 인증코드를 보낸적이 있는 경우 이메일 재전송까지 시간제한을 걸지 여부 기획
 
+            emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
             redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(),
                     authCode,
                     EMAIL_AUTH_EXPIRE_TIME + Duration.ofSeconds(10).toSeconds()); // 정책상 유효기간보다는 10초 더 여유있게 설정
-            emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
-            return buildEmailAuthResult(emailAuthRequestDto, authCode);
+            EmailAuthResultDto emailAuthResult = buildEmailAuthResult(emailAuthRequestDto, authCode);
+            redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
+            return emailAuthResult ;
         }
 
         //처음 인증받는 사람들 email DB저장 및 인증코드 전송
         EmailAuth emailAuth = emailAuthRequestDto.createEmailAuth(emailAuthRequestDto);
         emailRepository.save(emailAuth);
-        redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
         emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
-        return buildEmailAuthResult(emailAuthRequestDto, authCode);
+        EmailAuthResultDto emailAuthResult = buildEmailAuthResult(emailAuthRequestDto, authCode);
+        redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
+        return emailAuthResult ;
     }
 
     private EmailAuthResultDto buildEmailAuthResult(EmailAuthRequestDto emailAuthRequestDto, String authCode) {
