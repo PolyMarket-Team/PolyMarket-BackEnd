@@ -46,7 +46,7 @@ public class EmailAuthService {
      */
     public EmailAuthResultDto sendAuthCodeToEmail(EmailAuthDto emailAuthDto) {
         String authCode = emailUtil.createCode(EMAIL_AUTH_CODE_LENGTH);
-        signValidateDuplicated(emailAuthDto.getEmail());
+        validateSignUpDuplicated(emailAuthDto.getEmail());
 
         LocalDateTime expiredDateTime = ZonedDateTime.now(ZoneId.of(SERVER_STANDARD_TIMEZONE)).plus(5, ChronoUnit.MINUTES).toLocalDateTime();
 
@@ -59,12 +59,12 @@ public class EmailAuthService {
 
         //이메일 인증까지 완료 했지만 회원가입을 완료하지 않은 사람들 검증
         if (emailRepository.existsByEmail(emailAuthDto.getEmail())) {
+            // TODO 회원가입은 안됐으나 이메일 인증코드를 보낸적이 있는 경우 이메일 재전송까지 시간제한을 걸지 여부 기획
+
             redisService.setDataWithExpiration(RedisKey.CODE.getKey() + emailAuthDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
             emailUtil.send(emailAuthDto.getEmail(), authCode);
             return emailAuthResult;
         }
-
-        emailValidateDuplicated(emailAuthDto.getEmail());
 
         //처음 인증받는 사람들 email DB저장 및 인증코드 전송
         EmailAuth emailAuth = emailAuthDto.createEmailAuth(emailAuthDto);
@@ -95,7 +95,7 @@ public class EmailAuthService {
     /**
      * 회원가입이 되어있는지 확인하는 메서드
      */
-    public void signValidateDuplicated(String email) {
+    public void validateSignUpDuplicated(String email) {
         if (userRepository.findByEmail(email).isPresent())
             throw new UserEmailAlreadyExistsException();
     }
