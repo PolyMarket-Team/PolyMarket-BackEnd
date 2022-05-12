@@ -9,6 +9,7 @@ import kr.polymarket.domain.user.exception.InvalidRefreshTokenException;
 import kr.polymarket.domain.user.exception.LoginFailureException;
 import kr.polymarket.domain.user.exception.UserNotFoundException;
 import kr.polymarket.domain.user.entity.User;
+import kr.polymarket.domain.user.repository.RedisRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.global.config.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class UserAuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RedisService redisService;
+    private final RedisRepository redisService;
     private final JwtTokenProvider jwtTokenProvider;
 
     /**

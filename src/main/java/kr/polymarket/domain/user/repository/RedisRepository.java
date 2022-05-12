@@ -1,16 +1,14 @@
-package kr.polymarket.domain.user.service;
+package kr.polymarket.domain.user.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 
-@Service
-@Transactional
+@Repository
 @RequiredArgsConstructor
-public class RedisService {
+public class RedisRepository {
 
     public final RedisTemplate<String, String> redisTemplate;
 

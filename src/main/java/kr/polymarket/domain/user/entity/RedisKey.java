@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum RedisKey {
-    CODE(""), REFRESH("REFRESH");
+    EMAIL_AUTH_CODE("EMAIL_AUTH_CODE"), REFRESH("REFRESH");
 
     private String key;
 
