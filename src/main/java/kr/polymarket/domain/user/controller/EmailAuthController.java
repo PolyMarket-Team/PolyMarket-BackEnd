@@ -1,6 +1,6 @@
 package kr.polymarket.domain.user.controller;
 
-import kr.polymarket.domain.user.dto.EmailAuthDto;
+import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
 import kr.polymarket.domain.user.dto.EmailAuthResultDto;
 import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
 import kr.polymarket.domain.user.service.EmailAuthService;
@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -23,11 +25,11 @@ public class EmailAuthController {
 
     /**
      * 이메일 인증코드 전송
-     * @param emailAuthDto
+     * @param emailAuthRequestDto
      */
     @PostMapping("/send-email")
-    public ResponseEntity<ResultResponse> sendEmailAuthCode(@RequestBody EmailAuthDto emailAuthDto) {
-        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthDto);
+    public ResponseEntity<ResultResponse> sendEmailAuthCode(@Valid @RequestBody EmailAuthRequestDto emailAuthRequestDto) {
+        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
 
         ResultResponse result = ResultResponse.of(ResultCode.EMAIL_SEND_SUCCESS, emailAuthResult);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));

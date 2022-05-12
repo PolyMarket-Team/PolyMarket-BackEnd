@@ -1,5 +1,6 @@
 package kr.polymarket.global.error;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,9 +17,15 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ErrorResponse {
 
+    @ApiModelProperty(name = "응답 메세지", notes = "응답 메세지")
     private int status;
+
+    @ApiModelProperty(name = "http status", notes = "http status")
     private String code;
+
+    @ApiModelProperty(name = "에러 목록", notes = "에러 목록")
     private String message;
+
     private List<FieldError> errors;
 
     private ErrorResponse(final ErrorCode code, final List<FieldError> errors) {
@@ -75,14 +82,14 @@ public class ErrorResponse {
         }
 
         public static List<FieldError> of(final String field, final String value, final String reason) {
-            List<FieldError> fieldErrors = new ArrayList<>();
-            fieldErrors.add(new FieldError(field, value, reason));
-            return fieldErrors;
+            List<FieldError> fieldErrorList = new ArrayList<>();
+            fieldErrorList.add(new FieldError(field, value, reason));
+            return fieldErrorList;
         }
 
         private static List<FieldError> of(final BindingResult bindingResult) {
-            final List<org.springframework.validation.FieldError> fieldErrors = bindingResult.getFieldErrors();
-            return fieldErrors.stream()
+            final List<org.springframework.validation.FieldError> fieldErrorList = bindingResult.getFieldErrors();
+            return fieldErrorList.stream()
                     .map(error -> new FieldError(
                             error.getField(),
                             error.getRejectedValue() == null ? "" : error.getRejectedValue().toString(),
@@ -95,7 +102,7 @@ public class ErrorResponse {
             return lists.stream()
                     .map(error -> new FieldError(
                             error.getPropertyPath().toString(),
-                            "" ,
+                            "",
                             error.getMessageTemplate()))
                     .collect(Collectors.toList());
         }

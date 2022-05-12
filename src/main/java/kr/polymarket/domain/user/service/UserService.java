@@ -3,7 +3,7 @@ package kr.polymarket.domain.user.service;
 import kr.polymarket.domain.user.dto.SignUpDto;
 import kr.polymarket.domain.user.entity.User;
 import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
-import kr.polymarket.domain.user.exception.UserEmailAlreadyExistsException;
+import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
 import kr.polymarket.domain.user.repository.EmailRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.entity.Verify;
@@ -50,7 +50,7 @@ public class UserService {
      */
     public void emailValidateDuplicated(String email) {
         if (userRepository.findByEmail(email).isPresent())
-            throw new UserEmailAlreadyExistsException();
+            throw new UserAlreadySignUpException();
     }
 
     /**

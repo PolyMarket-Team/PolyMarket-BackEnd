@@ -6,6 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    // User
+    USER_ALREADY_SIGNUP(409, "U001", "이미 가입한 사용자입니다."),
+
     // Global
     INTERNAL_SERVER_ERROR(500, "G001", "내부 서버 오류입니다."),
     METHOD_NOT_ALLOWED(405, "G002", "허용되지 않은 HTTP method입니다."),

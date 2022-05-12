@@ -1,13 +1,13 @@
 package kr.polymarket.domain.user.service;
 
-import kr.polymarket.domain.user.dto.EmailAuthDto;
+import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
 import kr.polymarket.domain.user.dto.EmailAuthResultDto;
 import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
 import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.entity.User;
 import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
 import kr.polymarket.domain.user.exception.EmailNotFoundException;
-import kr.polymarket.domain.user.exception.UserEmailAlreadyExistsException;
+import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
 import kr.polymarket.domain.user.repository.EmailRepository;
 import kr.polymarket.domain.user.repository.RedisRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
@@ -53,7 +53,7 @@ public class EmailAuthServiceTest {
     void sendAuthCodeToEmail_회원가입x_이메일인증코드를_보낸적o() {
         // given
         final String email = "test@email.com";
-        final EmailAuthDto emailAuthDto = EmailAuthDto.builder()
+        final EmailAuthRequestDto emailAuthRequestDto = EmailAuthRequestDto.builder()
                 .email(email)
                 .build();
 
@@ -63,7 +63,7 @@ public class EmailAuthServiceTest {
         given(emailUtil.createCode(anyInt())).willReturn("123456");
 
         // when
-        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthDto);
+        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
 
         // then
         assertThat(emailAuthResult.getEmail()).isEqualTo(email);
@@ -75,7 +75,7 @@ public class EmailAuthServiceTest {
     void sendAuthCodeToEmail_회원가입x_이메일인증코드를_보낸적x() {
         // given
         final String email = "test@email.com";
-        final EmailAuthDto emailAuthDto = EmailAuthDto.builder()
+        final EmailAuthRequestDto emailAuthRequestDto = EmailAuthRequestDto.builder()
                 .email(email)
                 .build();
 
@@ -85,7 +85,7 @@ public class EmailAuthServiceTest {
         given(emailUtil.createCode(anyInt())).willReturn("123456");
 
         // when
-        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthDto);
+        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
 
         // then
         assertThat(emailAuthResult.getEmail()).isEqualTo(email);
@@ -97,18 +97,18 @@ public class EmailAuthServiceTest {
     void sendAuthCodeToEmail_회원가입o() {
         // given
         final String email = "test@email.com";
-        final EmailAuthDto emailAuthDto = EmailAuthDto.builder()
+        final EmailAuthRequestDto emailAuthRequestDto = EmailAuthRequestDto.builder()
                 .email(email)
                 .build();
 
         given(userRepository.findByEmail(email)).willReturn(Optional.of(User.builder().build()));
 
         // when
-        Throwable exception = catchThrowable(() -> emailAuthService.sendAuthCodeToEmail(emailAuthDto));
+        Throwable exception = catchThrowable(() -> emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto));
 
         // then
         assertThat(exception)
-                .isInstanceOf(UserEmailAlreadyExistsException.class);
+                .isInstanceOf(UserAlreadySignUpException.class);
     }
 
     @Test
@@ -116,7 +116,7 @@ public class EmailAuthServiceTest {
     void sendAuthCodeToEmail_반환값_응답코드_노출x() {
         // given
         final String email = "test@email.com";
-        final EmailAuthDto emailAuthDto = EmailAuthDto.builder()
+        final EmailAuthRequestDto emailAuthRequestDto = EmailAuthRequestDto.builder()
                 .email(email)
                 .build();
 
@@ -125,7 +125,7 @@ public class EmailAuthServiceTest {
         given(emailUtil.createCode(anyInt())).willReturn("123456");
 
         // when
-        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthDto);
+        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
 
         // then
         assertThat(emailAuthResult.getEmail()).isEqualTo(email);
