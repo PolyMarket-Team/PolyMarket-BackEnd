@@ -46,22 +46,15 @@ public class EmailAuthService {
         String authCode = emailUtil.createCode(EMAIL_AUTH_CODE_LENGTH);
         validateSignUpDuplicated(emailAuthRequestDto.getEmail());
 
-        LocalDateTime expiredDateTime = ZonedDateTime.now(ZoneId.of(SERVER_STANDARD_TIMEZONE)).plus(5, ChronoUnit.MINUTES).toLocalDateTime();
-
-        EmailAuthResultDto emailAuthResult = EmailAuthResultDto.builder()
-                .email(emailAuthRequestDto.getEmail())
-                .authCode("prod".equals(appProperty.getEnv())? null: authCode)
-                .expireDateTime(expiredDateTime)
-                .expireDateTimeZone(SERVER_STANDARD_TIMEZONE)
-                .build();
-
         //이메일 인증까지 완료 했지만 회원가입을 완료하지 않은 사람들 검증
         if (emailRepository.existsByEmail(emailAuthRequestDto.getEmail())) {
             // TODO 회원가입은 안됐으나 이메일 인증코드를 보낸적이 있는 경우 이메일 재전송까지 시간제한을 걸지 여부 기획
 
-            redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
+            redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(),
+                    authCode,
+                    EMAIL_AUTH_EXPIRE_TIME + Duration.ofSeconds(10).toSeconds()); // 정책상 유효기간보다는 10초 더 여유있게 설정
             emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
-            return emailAuthResult;
+            return buildEmailAuthResult(emailAuthRequestDto, authCode);
         }
 
         //처음 인증받는 사람들 email DB저장 및 인증코드 전송
@@ -69,7 +62,18 @@ public class EmailAuthService {
         emailRepository.save(emailAuth);
         redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
         emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
-        return emailAuthResult;
+        return buildEmailAuthResult(emailAuthRequestDto, authCode);
+    }
+
+    private EmailAuthResultDto buildEmailAuthResult(EmailAuthRequestDto emailAuthRequestDto, String authCode) {
+        LocalDateTime expiredDateTime = ZonedDateTime.now(ZoneId.of(SERVER_STANDARD_TIMEZONE)).plus(5, ChronoUnit.MINUTES).toLocalDateTime();
+
+        return EmailAuthResultDto.builder()
+                .email(emailAuthRequestDto.getEmail())
+                .authCode("prod".equals(appProperty.getEnv())? null: authCode)
+                .expireDateTime(expiredDateTime)
+                .expireDateTimeZone(SERVER_STANDARD_TIMEZONE)
+                .build();
     }
 
     /**
