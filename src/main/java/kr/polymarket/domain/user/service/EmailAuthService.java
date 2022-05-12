@@ -15,6 +15,7 @@ import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.util.EmailUtil;
 import kr.polymarket.global.properties.AppProperty;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailAuthService {
 
     private final UserRepository userRepository;
@@ -42,11 +44,12 @@ public class EmailAuthService {
     /**
      * 이메일 전송 및 임시 저장
      */
+    @Transactional
     public EmailAuthResultDto sendAuthCodeToEmail(EmailAuthRequestDto emailAuthRequestDto) {
         String authCode = emailUtil.createCode(EMAIL_AUTH_CODE_LENGTH);
         validateSignUpDuplicated(emailAuthRequestDto.getEmail());
 
-        //이메일 인증까지 완료 했지만 회원가입을 완료하지 않은 사람들 검증
+        //이메일 인증을 완료 못했지만 회원가입을 완료하지 않은 사람들 검증
         if (emailRepository.existsByEmail(emailAuthRequestDto.getEmail())) {
             // TODO 회원가입은 안됐으나 이메일 인증코드를 보낸적이 있는 경우 이메일 재전송까지 시간제한을 걸지 여부 기획
             emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
@@ -81,9 +84,10 @@ public class EmailAuthService {
     /**
      * 이메일 인증 완료
      */
+    @Transactional
     public void confirmEmailAuthCode(EmailAuthCheckRequestDto emailCodeRequestDto) {
 
-        String emailAuthCode = redisRepository.getData(emailCodeRequestDto.getEmail());
+        String emailAuthCode = redisRepository.getData(RedisKey.EMAIL_AUTH_CODE + emailCodeRequestDto.getEmail());
 
         //인증코드가 만료되거나 인증코드 값이 같지 않으면 에러발생
         if (!emailCodeRequestDto.getAuthCode().equals(emailAuthCode)) {

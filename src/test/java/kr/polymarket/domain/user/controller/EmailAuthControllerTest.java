@@ -1,9 +1,9 @@
 package kr.polymarket.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.polymarket.domain.user.dto.EmailAuthCheckRequestDto;
 import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
 import kr.polymarket.domain.user.dto.EmailAuthResultDto;
-import kr.polymarket.domain.user.dto.EmailAuthCheckRequestDto;
 import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
 import kr.polymarket.domain.user.exception.EmailNotFoundException;
 import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
