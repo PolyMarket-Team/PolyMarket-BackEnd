@@ -23,7 +23,7 @@ public class UserDetailService implements UserDetailsService {
 
         return UserDetail.builder()
                 .email(user.getEmail())
-                .password(user.getPasssword())
+                .password(user.getPassword())
                 .build();
     }
 }

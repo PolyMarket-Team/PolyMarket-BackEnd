@@ -35,7 +35,7 @@ public class UserAuthService {
     @Transactional
     public LoginResponseDto userSignIn(LoginRequestDto loginRequestDto) {
         User user = userRepository.findByEmail(loginRequestDto.getEmail()).orElseThrow(LoginFailureException::new);
-        if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPasssword()))
+        if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword()))
             throw new LoginFailureException();
 
         String refreshToken = jwtTokenProvider.createRefreshToken();

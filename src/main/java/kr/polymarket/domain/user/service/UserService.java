@@ -37,7 +37,7 @@ public class UserService {
         User user = userRepository.save(
                 User.builder()
                         .email(signUpDto.getEmail())
-                        .passsword(bCryptPasswordEncoder.encode(signUpDto.getPassword()))
+                        .password(bCryptPasswordEncoder.encode(signUpDto.getPassword()))
                         .nickname(signUpDto.getNickname())
                         .createDate(LocalDateTime.now())
                         .updateDate(LocalDateTime.now())
