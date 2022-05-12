@@ -40,7 +40,7 @@ public class EmailAuthController {
      * @param emailCodeRequestDto
      */
     @PostMapping("/confirm-email")
-    public ResponseEntity<ResultResponse> confirmEmail(@RequestBody EmailCodeRequestDto emailCodeRequestDto) {
+    public ResponseEntity<ResultResponse> confirmEmailAuthCode(@Valid @RequestBody EmailCodeRequestDto emailCodeRequestDto) {
         emailAuthService.confirmEmailAuthCode(emailCodeRequestDto);
 
         ResultResponse result = ResultResponse.of(ResultCode.CONFIRM_EMAIL_SUCCESS, emailCodeRequestDto);
