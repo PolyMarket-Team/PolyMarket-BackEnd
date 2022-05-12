@@ -2,7 +2,7 @@ package kr.polymarket.domain.user.service;
 
 import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
 import kr.polymarket.domain.user.dto.EmailAuthResultDto;
-import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
+import kr.polymarket.domain.user.dto.EmailAuthCheckRequestDto;
 import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.entity.User;
 import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
@@ -137,7 +137,7 @@ public class EmailAuthServiceTest {
         // given
         final String email = "test@email.com";
         final String authCode = "123456";
-        final EmailCodeRequestDto emailCodeRequestDto = EmailCodeRequestDto.builder()
+        final EmailAuthCheckRequestDto emailCodeRequestDto = EmailAuthCheckRequestDto.builder()
                 .email(email)
                 .authCode(authCode)
                 .build();
@@ -157,7 +157,7 @@ public class EmailAuthServiceTest {
         // given
         final String email = "test@email.com";
         final String authCode = "123456";
-        final EmailCodeRequestDto emailCodeRequestDto = EmailCodeRequestDto.builder()
+        final EmailAuthCheckRequestDto emailCodeRequestDto = EmailAuthCheckRequestDto.builder()
                 .email(email)
                 .authCode(authCode)
                 .build();
@@ -177,7 +177,7 @@ public class EmailAuthServiceTest {
         // given
         final String email = "test@email.com";
         final String authCode = "123456";
-        final EmailCodeRequestDto emailCodeRequestDto = EmailCodeRequestDto.builder()
+        final EmailAuthCheckRequestDto emailCodeRequestDto = EmailAuthCheckRequestDto.builder()
                 .email(email)
                 .authCode(authCode)
                 .build();

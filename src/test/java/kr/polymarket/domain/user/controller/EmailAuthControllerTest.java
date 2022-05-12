@@ -3,7 +3,7 @@ package kr.polymarket.domain.user.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
 import kr.polymarket.domain.user.dto.EmailAuthResultDto;
-import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
+import kr.polymarket.domain.user.dto.EmailAuthCheckRequestDto;
 import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
 import kr.polymarket.domain.user.exception.EmailNotFoundException;
 import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
@@ -107,7 +107,7 @@ public class EmailAuthControllerTest {
         // given
         final String email = "test@email.com";
         final String authCode = "123456";
-        final EmailCodeRequestDto emailCodeRequestDto = EmailCodeRequestDto.builder()
+        final EmailAuthCheckRequestDto emailCodeRequestDto = EmailAuthCheckRequestDto.builder()
                 .email(email)
                 .authCode(authCode)
                 .build();
@@ -128,19 +128,19 @@ public class EmailAuthControllerTest {
         final String invalidAuthCode = "12345";
         final String blankStr = "";
 
-        final EmailCodeRequestDto invalidEmailReq = EmailCodeRequestDto.builder()
+        final EmailAuthCheckRequestDto invalidEmailReq = EmailAuthCheckRequestDto.builder()
                 .email(invalidEmail)
                 .authCode(authCode)
                 .build();
-        final EmailCodeRequestDto invalidLengthAuthCodeReq = EmailCodeRequestDto.builder()
+        final EmailAuthCheckRequestDto invalidLengthAuthCodeReq = EmailAuthCheckRequestDto.builder()
                 .email(email)
                 .authCode(invalidAuthCode)
                 .build();
-        final EmailCodeRequestDto blankEmailReq = EmailCodeRequestDto.builder()
+        final EmailAuthCheckRequestDto blankEmailReq = EmailAuthCheckRequestDto.builder()
                 .email(blankStr)
                 .authCode(authCode)
                 .build();
-        final EmailCodeRequestDto blankAuthCodeReq = EmailCodeRequestDto.builder()
+        final EmailAuthCheckRequestDto blankAuthCodeReq = EmailAuthCheckRequestDto.builder()
                 .email(email)
                 .authCode(blankStr)
                 .build();
@@ -164,7 +164,7 @@ public class EmailAuthControllerTest {
         // given
         final String email = "test@email.com";
         final String wrongAuthCode = "123456"; // Wrong Auth Code
-        final EmailCodeRequestDto emailCodeRequestDto = EmailCodeRequestDto.builder()
+        final EmailAuthCheckRequestDto emailCodeRequestDto = EmailAuthCheckRequestDto.builder()
                 .email(email)
                 .authCode(wrongAuthCode)
                 .build();
@@ -184,7 +184,7 @@ public class EmailAuthControllerTest {
         // given
         final String email = "test@email.com";
         final String wrongAuthCode = "123456"; // Wrong Auth Code
-        final EmailCodeRequestDto emailCodeRequestDto = EmailCodeRequestDto.builder()
+        final EmailAuthCheckRequestDto emailCodeRequestDto = EmailAuthCheckRequestDto.builder()
                 .email(email)
                 .authCode(wrongAuthCode)
                 .build();
@@ -206,7 +206,7 @@ public class EmailAuthControllerTest {
                 .andDo(print());
     }
 
-    private ResultActions requestConfirmEmailAuthCode(EmailCodeRequestDto emailCodeRequestDto) throws Exception {
+    private ResultActions requestConfirmEmailAuthCode(EmailAuthCheckRequestDto emailCodeRequestDto) throws Exception {
         return mvc.perform(post("/users/confirm-email")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(emailCodeRequestDto)))

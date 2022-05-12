@@ -2,7 +2,7 @@ package kr.polymarket.domain.user.service;
 
 import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
 import kr.polymarket.domain.user.dto.EmailAuthResultDto;
-import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
+import kr.polymarket.domain.user.dto.EmailAuthCheckRequestDto;
 import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.entity.RedisKey;
 import kr.polymarket.domain.user.exception.EmailAlreadySendException;
@@ -75,7 +75,7 @@ public class EmailAuthService {
     /**
      * 이메일 인증 완료
      */
-    public void confirmEmailAuthCode(EmailCodeRequestDto emailCodeRequestDto) {
+    public void confirmEmailAuthCode(EmailAuthCheckRequestDto emailCodeRequestDto) {
 
         String emailAuthCode = redisRepository.getData(emailCodeRequestDto.getEmail());
 

@@ -1,5 +1,6 @@
 package kr.polymarket.global.error;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,17 +16,19 @@ import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ApiModel(description = "에러 응답 메시지")
 public class ErrorResponse {
 
-    @ApiModelProperty(name = "응답 메세지", notes = "응답 메세지")
+    @ApiModelProperty(name = "http status", notes = "http status", example = "4xx")
     private int status;
 
-    @ApiModelProperty(name = "http status", notes = "http status")
+    @ApiModelProperty(name = "에러코드", notes = "에러코드", example = "C999")
     private String code;
 
-    @ApiModelProperty(name = "에러 목록", notes = "에러 목록")
+    @ApiModelProperty(name = "에러 메시지", notes = "에러 메시지", example = "에러 메시지")
     private String message;
 
+    @ApiModelProperty(name = "필드 에러", notes = "필드 에러")
     private List<FieldError> errors;
 
     private ErrorResponse(final ErrorCode code, final List<FieldError> errors) {
@@ -71,8 +74,11 @@ public class ErrorResponse {
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class FieldError {
+        @ApiModelProperty(name = "필드 명", notes = "필드 명")
         private String field;
+        @ApiModelProperty(name = "필드 값", notes = "필드 값")
         private String value;
+        @ApiModelProperty(name = "필드 에러 원인", notes = "필드 에러 원인")
         private String reason;
 
         public FieldError(final String field, final String value, final String reason) {
