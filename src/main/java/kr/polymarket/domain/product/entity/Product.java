@@ -1,8 +1,11 @@
 package kr.polymarket.domain.product.entity;
 
+import kr.polymarket.domain.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -41,7 +44,12 @@ public class Product {
     @Column(nullable = false)
     private LocalDateTime updateDate;
 
-    @OneToMany(mappedBy = "product")
-    private final List<ProductImage> productImageList  = new ArrayList<>();
+    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private final List<ProductImage> productImageList = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private User user;
 
 }
