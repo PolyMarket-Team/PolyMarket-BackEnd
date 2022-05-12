@@ -3,6 +3,7 @@ package kr.polymarket.domain.user.util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
@@ -14,6 +15,7 @@ public class EmailUtil {
     private final JavaMailSender javaMailSender;
 
     //이메일 전송
+    @Async("threadPoolTaskExecutor")
     public void send(String email, String authCode) {
         SimpleMailMessage smm = new SimpleMailMessage();
         smm.setTo(email);

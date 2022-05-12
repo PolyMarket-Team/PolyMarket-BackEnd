@@ -15,10 +15,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @RequiredArgsConstructor
@@ -58,6 +56,37 @@ public class SlackLoggingUtil {
                 requestPayload, String.class);
 
         return response.getBody();
+    }
+
+    /**
+     * 슬랙 웹훅으로 보낼 Exception 메시지 추출
+     * @param e
+     * @return
+     */
+    public String extractErrorMessage(Throwable e) {
+        final int SLACK_WEBHOOK_TEXT_LENGTH_LIMIT = 2000; // slack message text 글자제한수
+        StringBuilder slackMessageBuilder = new StringBuilder();
+        AtomicInteger messageLineBreakNum = new AtomicInteger(0); // java 문자열은 \n을 하나의 문자로 취급하기 때문에 줄바꿈 문자 갯수 카운팅하기 위한 변수
+        slackMessageBuilder
+                .append(e.getClass().getName())
+                .append("\n")
+                .append(e.getMessage())
+                .append("\n");
+        Arrays.stream(e.getStackTrace())
+                .forEach(stackTraceElement -> {
+                    messageLineBreakNum.getAndIncrement();
+                    slackMessageBuilder
+                            .append(stackTraceElement.toString())
+                            .append("\n");
+                });
+        messageLineBreakNum.addAndGet(2); // 위 append 작업에서 두개의 줄바꿈문자('\n')를 추가했으므로 카운트 증가
+
+        /**
+         * slack text 메시지는 2000자 글자수 제한이 있어 substring 연산 및 결과 반환
+         * ! 자바에서는 줄바꿈문자('\n')을 하나의 문자로 취급하지만 json 문자열 과정에서 '\', 'n' 문자를 별개의 문자로 보기때문에 줄바꿈 문자갯수를 빼준다
+         */
+        return slackMessageBuilder
+                .substring(0, Math.min(slackMessageBuilder.length(), SLACK_WEBHOOK_TEXT_LENGTH_LIMIT) - messageLineBreakNum.get());
     }
 
     /**
