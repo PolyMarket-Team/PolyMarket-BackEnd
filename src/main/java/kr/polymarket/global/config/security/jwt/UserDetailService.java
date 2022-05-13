@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDetailService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private Object UserNotFoundException;
 
     @Override
     public UserDetail loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -23,7 +22,7 @@ public class UserDetailService implements UserDetailsService {
 
         return UserDetail.builder()
                 .email(user.getEmail())
-                .password(user.getPasssword())
+                .password(user.getPassword())
                 .build();
     }
 }

@@ -1,14 +1,31 @@
 package kr.polymarket.global.config;
 
+import kr.polymarket.global.util.slack.SlackLoggingUtil;
+import kr.polymarket.global.util.slack.model.SlackLoggingTargetType;
+import kr.polymarket.global.util.slack.model.SlackLoggingType;
+import kr.polymarket.global.util.slack.model.SlackWebhookCustomField;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.scheduling.annotation.AsyncConfigurerSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Method;
+import java.util.List;
 
 @EnableAsync
 @Configuration
-public class AsyncConfig {
+@RequiredArgsConstructor
+@Slf4j
+public class AsyncConfig extends AsyncConfigurerSupport {
+
+    private final SlackLoggingUtil slackLoggingUtil;
 
     /**
      * async 작업시 사용할 스레드 풀 bean
@@ -24,5 +41,42 @@ public class AsyncConfig {
         executor.setThreadNamePrefix("async-"); // 스레드 풀 내부의 스레드 이름 접두사(prefix) 설정
         executor.initialize();
         return executor;
+    }
+
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return (e, method, params) -> {
+            try {
+                List<SlackWebhookCustomField> slackWebhookCustomFieldsList = List.of(
+                        SlackWebhookCustomField.builder()
+                                .label("Async Exception")
+                                .text("exception in thread pool")
+                                .build(),
+                        SlackWebhookCustomField.builder()
+                                .label("invoked class")
+                                .text(method.getDeclaringClass().getName())
+                                .build(),
+                        SlackWebhookCustomField.builder()
+                                .label("invoked method")
+                                .text(method.getName())
+                                .build(),
+                        SlackWebhookCustomField.builder()
+                                .label("Error Log")
+                                .text(slackLoggingUtil.extractErrorMessage(e))
+                                .build()
+                );
+
+                threadPoolTaskExecutor().execute(() -> {
+                    try {
+                        slackLoggingUtil.logToSlackWebhookChannel(SlackLoggingTargetType.API, SlackLoggingType.ERROR, slackWebhookCustomFieldsList);
+                    } catch (Exception ex) {
+                        // TODO 429(too many requests 메시지는 논의)
+                        ex.printStackTrace();
+                    }
+                });
+            } catch (Exception ex) {
+                log.error("", ex);
+            }
+        };
     }
 }

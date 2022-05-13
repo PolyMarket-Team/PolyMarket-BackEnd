@@ -6,6 +6,13 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    // User
+    USER_ALREADY_SIGNUP(409, "U001", "이미 가입한 사용자입니다."),
+    EMAIL_AUTH_CODE_AUTH_FAIL(401, "U002", "이메일 인증에 실패하였습니다."),
+    EMAIL_AUTH_NOT_FOUND(404, "U003", "찾을 수 없는 이메일 인증정보입니다."),
+    SIGN_IN_FAIL(401, "U004", "로그인에 실패하였습니다."),
+    REFRESH_TOKEN_FAIL(401, "U004", "access token 재발행에 실패했습니다."),
+
     // Global
     INTERNAL_SERVER_ERROR(500, "G001", "내부 서버 오류입니다."),
     METHOD_NOT_ALLOWED(405, "G002", "허용되지 않은 HTTP method입니다."),

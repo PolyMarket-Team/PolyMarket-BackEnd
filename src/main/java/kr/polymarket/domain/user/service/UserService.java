@@ -1,9 +1,10 @@
 package kr.polymarket.domain.user.service;
 
-import kr.polymarket.domain.user.dto.SignUpDto;
+import kr.polymarket.domain.user.dto.SignUpRequestDto;
 import kr.polymarket.domain.user.entity.User;
-import kr.polymarket.domain.user.exception.EmailAuthCodeNotFoundException;
-import kr.polymarket.domain.user.exception.UserEmailAlreadyExistsException;
+import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
+import kr.polymarket.domain.user.exception.EmailNotFoundException;
+import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
 import kr.polymarket.domain.user.repository.EmailRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.entity.Verify;
@@ -28,16 +29,16 @@ public class UserService {
      * 회원가입
      */
     @Transactional
-    public void createUser(SignUpDto signUpDto) {
-        //중복 여부 검증
-        emailValidateDuplicated(signUpDto.getEmail());
-        verifyValidateDuplicated(signUpDto.getEmail());
-        nicknameValidateDuplication(signUpDto.getNickname());
+    public void createUser(SignUpRequestDto signUpDto) {
+        //중복 여부, 이메일 인증체크 검증
+        validateSignUpDuplicationBy(signUpDto.getEmail());
+        validateEmailAuthCheckBy(signUpDto.getEmail());
+        validateNicknameDuplicationBy(signUpDto.getNickname());
 
-        User user = userRepository.save(
+        userRepository.save(
                 User.builder()
                         .email(signUpDto.getEmail())
-                        .passsword(bCryptPasswordEncoder.encode(signUpDto.getPassword()))
+                        .password(bCryptPasswordEncoder.encode(signUpDto.getPassword()))
                         .nickname(signUpDto.getNickname())
                         .createDate(LocalDateTime.now())
                         .updateDate(LocalDateTime.now())
@@ -45,18 +46,18 @@ public class UserService {
     }
 
     /**
-     * 이메일 존재 여부 확인
+     * 회원가입 여부 확인
      * @param email
      */
-    public void emailValidateDuplicated(String email) {
+    public void validateSignUpDuplicationBy(String email) {
         if (userRepository.findByEmail(email).isPresent())
-            throw new UserEmailAlreadyExistsException();
+            throw new UserAlreadySignUpException();
     }
 
     /**
      * 닉네임 중복 확인 메서드
      */
-    public void nicknameValidateDuplication(String nickname) {
+    public void validateNicknameDuplicationBy(String nickname) {
         if (userRepository.existsByNickname(nickname)) {
             throw new IllegalStateException("이미 존재하는 닉네임입니다.");
         }
@@ -65,9 +66,10 @@ public class UserService {
     /**
      * 이메일 인증여부 확인 메서드
      */
-    public void verifyValidateDuplicated(String email) {
-        if (emailRepository.findByEmail(email).get().getVerify() == Verify.EMAIL_CHECK_REQUIRE)
-            throw new EmailAuthCodeNotFoundException();
+    public void validateEmailAuthCheckBy(String email) {
+        if (emailRepository.findByEmail(email).orElseThrow(EmailNotFoundException::new)
+                .getVerify() == Verify.EMAIL_CHECK_REQUIRE)
+            throw new EmailAuthCodeAuthFailureException("이메일 인증이 되지않았습니다.");
     }
 
 

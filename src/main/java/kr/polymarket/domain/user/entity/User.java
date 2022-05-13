@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-@Table(name = "user")
+@Table(name = "`user`")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class User {
@@ -25,7 +25,7 @@ public class User {
     private String email;
 
     @Column(length = 300)
-    private String passsword;
+    private String password;
 
     @Column(length = 10)
     private String nickname;

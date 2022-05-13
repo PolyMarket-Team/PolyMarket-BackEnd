@@ -2,17 +2,16 @@ package kr.polymarket.domain.user.service;
 
 import kr.polymarket.domain.user.dto.LoginRequestDto;
 import kr.polymarket.domain.user.dto.LoginResponseDto;
-import kr.polymarket.domain.user.dto.TokenRequestDto;
 import kr.polymarket.domain.user.dto.TokenResponseDto;
 import kr.polymarket.domain.user.entity.RedisKey;
-import kr.polymarket.domain.user.exception.InvalidRefreshTokenException;
-import kr.polymarket.domain.user.exception.LoginFailureException;
-import kr.polymarket.domain.user.exception.UserNotFoundException;
 import kr.polymarket.domain.user.entity.User;
+import kr.polymarket.domain.user.exception.InvalidRefreshTokenException;
+import kr.polymarket.domain.user.exception.SignInFailureException;
+import kr.polymarket.domain.user.exception.UserNotFoundException;
+import kr.polymarket.domain.user.repository.RedisRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.global.config.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,7 @@ public class UserAuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RedisService redisService;
+    private final RedisRepository redisService;
     private final JwtTokenProvider jwtTokenProvider;
 
     /**
@@ -34,31 +33,32 @@ public class UserAuthService {
      */
     @Transactional
     public LoginResponseDto userSignIn(LoginRequestDto loginRequestDto) {
-        User user = userRepository.findByEmail(loginRequestDto.getEmail()).orElseThrow(LoginFailureException::new);
-        if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPasssword()))
-            throw new LoginFailureException();
+        User user = userRepository.findByEmail(loginRequestDto.getEmail()).orElseThrow(SignInFailureException::new);
+        if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword()))
+            throw new SignInFailureException();
 
-        String refreshToken = jwtTokenProvider.createRefreshToken();
+        String refreshToken = jwtTokenProvider.createRefreshToken(loginRequestDto.getEmail());
         redisService.setDataWithExpiration(RedisKey.REFRESH.getKey() + user.getEmail(), refreshToken, JwtTokenProvider.REFRESH_TOKEN_VALID_TIME);
         return new LoginResponseDto(user.getId(), jwtTokenProvider.createToken(loginRequestDto.getEmail()), refreshToken);
     }
 
     /**
      * 토큰 재발급
-     * @param requestDto
+     * @param refreshToken
      */
     @Transactional
-    public TokenResponseDto tokenRefresh(TokenRequestDto requestDto) {
-        String findRefreshToken = redisService.getData(RedisKey.REFRESH.getKey() + requestDto.getEmail());
-        if (findRefreshToken == null || !findRefreshToken.equals(requestDto.getRefreshToken()))
+    public TokenResponseDto tokenRefresh(String refreshToken) {
+        String email = jwtTokenProvider.getUserEmail(refreshToken);
+        String findRefreshToken = redisService.getData(RedisKey.REFRESH.getKey() + email);
+        if (findRefreshToken == null || !findRefreshToken.equals(refreshToken))
             throw new InvalidRefreshTokenException();
 
-        User user = userRepository.findByEmail(requestDto.getEmail()).orElseThrow(UserNotFoundException::new);
-        String accessToken = jwtTokenProvider.createToken(user.getEmail());
-        String refreshToken = jwtTokenProvider.createRefreshToken();
+        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        String newAccessToken = jwtTokenProvider.createToken(user.getEmail());
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
         redisService.setDataWithExpiration(RedisKey.REFRESH.getKey() + user.getEmail(), refreshToken, JwtTokenProvider.REFRESH_TOKEN_VALID_TIME);
 
-        return new TokenResponseDto(accessToken, refreshToken);
+        return new TokenResponseDto(newAccessToken, newRefreshToken);
     }
 }
 
