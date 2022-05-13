@@ -68,4 +68,17 @@ public class UserController {
         ResultResponse<TokenResponseDto> result = ResultResponse.of(ResultCode.REFRESH_SUCCESS, tokenResponseDto);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
     }
+
+    @ApiOperation(value = "회원 프로필 조회 API", notes = "회원의 프로필 정보, 닉네임,  API")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "success user profile"),
+            @ApiResponse(code = 400, message = "bad request", response = ErrorResponse.class),
+            @ApiResponse(code = 404, message = "not found", response = ErrorResponse.class),
+    })
+    @PostMapping("/{userId}")
+    public ResponseEntity<ResultResponse<UserProfileResponse>> userProfile(@PathVariable long userId) {
+        UserProfileResponse userProfileResponse = userService.findUserProfile(userId);
+        ResultResponse<UserProfileResponse> result = ResultResponse.of(ResultCode.SUCCESS, userProfileResponse);
+        return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
+    }
 }

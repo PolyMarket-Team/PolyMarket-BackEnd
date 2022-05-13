@@ -1,11 +1,9 @@
 package kr.polymarket.domain.user.service;
 
 import kr.polymarket.domain.user.dto.SignUpRequestDto;
+import kr.polymarket.domain.user.dto.UserProfileResponse;
 import kr.polymarket.domain.user.entity.User;
-import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
-import kr.polymarket.domain.user.exception.EmailNotFoundException;
-import kr.polymarket.domain.user.exception.NicknameAlreadyExistsException;
-import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
+import kr.polymarket.domain.user.exception.*;
 import kr.polymarket.domain.user.repository.EmailRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.entity.Verify;
@@ -15,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Service
@@ -44,6 +43,20 @@ public class UserService {
                         .createDate(LocalDateTime.now())
                         .updateDate(LocalDateTime.now())
                         .build());
+    }
+
+    /**
+     * 유저 프로필 정보 조회
+     */
+    public UserProfileResponse findUserProfile(long userId) {
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> { throw new UserNotFoundException("존재하지않는 회원입니다."); });
+
+        return UserProfileResponse.builder()
+                .userId(findUser.getId())
+                .nickname(findUser.getNickname())
+                .profileImageUrl(findUser.getUserFile() == null ? null : findUser.getUserFile().getFileUrl())
+                .build();
     }
 
     /**

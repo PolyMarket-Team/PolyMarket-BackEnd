@@ -13,6 +13,7 @@ public enum ErrorCode {
     SIGN_IN_FAIL(401, "U004", "로그인에 실패하였습니다."),
     REFRESH_TOKEN_FAIL(401, "U004", "access token 재발행에 실패했습니다."),
     NICKNAME_ALREADY_EXISTS(409, "U005", "이미 존재하는 닉네임입니다."),
+    USER_NOT_FOUND(404, "U006", "탈퇴하거나 존재하지않는 회원입니다."),
 
     // Global
     INTERNAL_SERVER_ERROR(500, "G001", "내부 서버 오류입니다."),

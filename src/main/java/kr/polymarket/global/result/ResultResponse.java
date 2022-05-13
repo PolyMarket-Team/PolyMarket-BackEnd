@@ -1,5 +1,6 @@
 package kr.polymarket.global.result;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 
@@ -13,9 +14,11 @@ public class ResultResponse<R> {
     private final String code;
 
     @ApiModelProperty(name = "응답메시지", notes = "응답메시지", example = "response message")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final String message;
 
     @ApiModelProperty(name = "응답데이터", notes = "응답데이터", example = "response data")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final R data;
 
     public static<T> ResultResponse<T> of(ResultCode resultCode, T data) {

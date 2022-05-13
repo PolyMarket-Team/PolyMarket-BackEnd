@@ -2,7 +2,7 @@ package kr.polymarket.domain.user.controller;
 
 import io.swagger.annotations.*;
 import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
-import kr.polymarket.domain.user.dto.EmailAuthResultDto;
+import kr.polymarket.domain.user.dto.EmailAuthResponseDto;
 import kr.polymarket.domain.user.dto.EmailAuthCheckRequestDto;
 import kr.polymarket.domain.user.service.EmailAuthService;
 import kr.polymarket.global.error.ErrorResponse;
@@ -35,10 +35,10 @@ public class EmailAuthController {
             @ApiResponse(code = 400, message = "bad request", response = ErrorResponse.class),
     })
     @PostMapping("/send-email")
-    public ResponseEntity<ResultResponse<EmailAuthResultDto>> sendEmailAuthCode(@Valid @RequestBody EmailAuthRequestDto emailAuthRequestDto) {
-        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
+    public ResponseEntity<ResultResponse<EmailAuthResponseDto>> sendEmailAuthCode(@Valid @RequestBody EmailAuthRequestDto emailAuthRequestDto) {
+        EmailAuthResponseDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
 
-        ResultResponse<EmailAuthResultDto> result = ResultResponse.of(ResultCode.EMAIL_SEND_SUCCESS, emailAuthResult);
+        ResultResponse<EmailAuthResponseDto> result = ResultResponse.of(ResultCode.EMAIL_SEND_SUCCESS, emailAuthResult);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
     }
 

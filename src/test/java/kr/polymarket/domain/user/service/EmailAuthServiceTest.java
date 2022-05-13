@@ -1,7 +1,7 @@
 package kr.polymarket.domain.user.service;
 
 import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
-import kr.polymarket.domain.user.dto.EmailAuthResultDto;
+import kr.polymarket.domain.user.dto.EmailAuthResponseDto;
 import kr.polymarket.domain.user.dto.EmailAuthCheckRequestDto;
 import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.entity.User;
@@ -63,7 +63,7 @@ public class EmailAuthServiceTest {
         given(emailUtil.createCode(anyInt())).willReturn("123456");
 
         // when
-        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
+        EmailAuthResponseDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
 
         // then
         assertThat(emailAuthResult.getEmail()).isEqualTo(email);
@@ -85,7 +85,7 @@ public class EmailAuthServiceTest {
         given(emailUtil.createCode(anyInt())).willReturn("123456");
 
         // when
-        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
+        EmailAuthResponseDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
 
         // then
         assertThat(emailAuthResult.getEmail()).isEqualTo(email);
@@ -125,7 +125,7 @@ public class EmailAuthServiceTest {
         given(emailUtil.createCode(anyInt())).willReturn("123456");
 
         // when
-        EmailAuthResultDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
+        EmailAuthResponseDto emailAuthResult = emailAuthService.sendAuthCodeToEmail(emailAuthRequestDto);
 
         // then
         assertThat(emailAuthResult.getEmail()).isEqualTo(email);
