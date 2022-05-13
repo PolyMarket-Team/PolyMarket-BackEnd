@@ -2,7 +2,7 @@ package kr.polymarket.domain.user.service;
 
 import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
 import kr.polymarket.domain.user.dto.EmailAuthResultDto;
-import kr.polymarket.domain.user.dto.EmailCodeRequestDto;
+import kr.polymarket.domain.user.dto.EmailAuthCheckRequestDto;
 import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.entity.RedisKey;
 import kr.polymarket.domain.user.exception.EmailAlreadySendException;
@@ -15,6 +15,8 @@ import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.util.EmailUtil;
 import kr.polymarket.global.properties.AppProperty;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +27,8 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class EmailAuthService {
 
     private final UserRepository userRepository;
@@ -42,42 +44,50 @@ public class EmailAuthService {
     /**
      * 이메일 전송 및 임시 저장
      */
+    @Transactional
     public EmailAuthResultDto sendAuthCodeToEmail(EmailAuthRequestDto emailAuthRequestDto) {
         String authCode = emailUtil.createCode(EMAIL_AUTH_CODE_LENGTH);
         validateSignUpDuplicated(emailAuthRequestDto.getEmail());
 
-        LocalDateTime expiredDateTime = ZonedDateTime.now(ZoneId.of(SERVER_STANDARD_TIMEZONE)).plus(5, ChronoUnit.MINUTES).toLocalDateTime();
-
-        EmailAuthResultDto emailAuthResult = EmailAuthResultDto.builder()
-                .email(emailAuthRequestDto.getEmail())
-                .authCode("prod".equals(appProperty.getEnv())? null: authCode)
-                .expireDateTime(expiredDateTime)
-                .expireDateTimeZone(SERVER_STANDARD_TIMEZONE)
-                .build();
-
-        //이메일 인증까지 완료 했지만 회원가입을 완료하지 않은 사람들 검증
+        //이메일 인증을 완료 못했지만 회원가입을 완료하지 않은 사람들 검증
         if (emailRepository.existsByEmail(emailAuthRequestDto.getEmail())) {
             // TODO 회원가입은 안됐으나 이메일 인증코드를 보낸적이 있는 경우 이메일 재전송까지 시간제한을 걸지 여부 기획
-
-            redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
             emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
-            return emailAuthResult;
+            redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(),
+                    authCode,
+                    EMAIL_AUTH_EXPIRE_TIME + Duration.ofSeconds(10).toSeconds()); // 정책상 유효기간보다는 10초 더 여유있게 설정
+            EmailAuthResultDto emailAuthResult = buildEmailAuthResult(emailAuthRequestDto, authCode);
+            redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
+            return emailAuthResult ;
         }
 
         //처음 인증받는 사람들 email DB저장 및 인증코드 전송
         EmailAuth emailAuth = emailAuthRequestDto.createEmailAuth(emailAuthRequestDto);
         emailRepository.save(emailAuth);
-        redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
         emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
-        return emailAuthResult;
+        EmailAuthResultDto emailAuthResult = buildEmailAuthResult(emailAuthRequestDto, authCode);
+        redisRepository.setDataWithExpiration(RedisKey.EMAIL_AUTH_CODE.getKey() + emailAuthRequestDto.getEmail(), authCode, EMAIL_AUTH_EXPIRE_TIME);
+        return emailAuthResult ;
+    }
+
+    private EmailAuthResultDto buildEmailAuthResult(EmailAuthRequestDto emailAuthRequestDto, String authCode) {
+        LocalDateTime expiredDateTime = ZonedDateTime.now(ZoneId.of(SERVER_STANDARD_TIMEZONE)).plus(5, ChronoUnit.MINUTES).toLocalDateTime();
+
+        return EmailAuthResultDto.builder()
+                .email(emailAuthRequestDto.getEmail())
+                .authCode("prod".equals(appProperty.getEnv())? null: authCode)
+                .expireDateTime(expiredDateTime)
+                .expireDateTimeZone(SERVER_STANDARD_TIMEZONE)
+                .build();
     }
 
     /**
      * 이메일 인증 완료
      */
-    public void confirmEmailAuthCode(EmailCodeRequestDto emailCodeRequestDto) {
+    @Transactional
+    public void confirmEmailAuthCode(EmailAuthCheckRequestDto emailCodeRequestDto) {
 
-        String emailAuthCode = redisRepository.getData(emailCodeRequestDto.getEmail());
+        String emailAuthCode = redisRepository.getData(RedisKey.EMAIL_AUTH_CODE + emailCodeRequestDto.getEmail());
 
         //인증코드가 만료되거나 인증코드 값이 같지 않으면 에러발생
         if (!emailCodeRequestDto.getAuthCode().equals(emailAuthCode)) {

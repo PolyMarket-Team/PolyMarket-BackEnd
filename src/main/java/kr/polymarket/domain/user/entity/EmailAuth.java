@@ -9,8 +9,7 @@ import javax.validation.constraints.Email;
 @Table(name = "email")
 @Builder
 @Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class EmailAuth {
 
@@ -18,12 +17,11 @@ public class EmailAuth {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Email()
+    @Column(unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
     private Verify verify;
-
 
     public void emailVerifiedSuccess() {
         this.verify = Verify.EMAIL_CHECK_COMPLETE;

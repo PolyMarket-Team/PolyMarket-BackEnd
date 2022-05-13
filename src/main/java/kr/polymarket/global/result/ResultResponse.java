@@ -1,28 +1,32 @@
 package kr.polymarket.global.result;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 
 @Getter
-public class ResultResponse {
+public class ResultResponse<R> {
 
-    private int status;
+    @ApiModelProperty(name = "응답상태", notes = "http 응답상태코드", example = "200")
+    private final int status;
 
-    private String code;
+    @ApiModelProperty(name = "응답코드", notes = "응답코드", example = "C999")
+    private final String code;
 
-    private String message;
+    @ApiModelProperty(name = "응답메시지", notes = "응답메시지", example = "response message")
+    private final String message;
 
-    private Object data;
+    @ApiModelProperty(name = "응답데이터", notes = "응답데이터", example = "response data")
+    private final R data;
 
-
-    public static ResultResponse of(ResultCode resultCode, Object data) {
-        return new ResultResponse(resultCode, data);
+    public static<T> ResultResponse<T> of(ResultCode resultCode, T data) {
+        return new ResultResponse<>(resultCode, data);
     }
 
-    public static ResultResponse of(ResultCode resultCode) {
-        return new ResultResponse(resultCode, "");
+    public static ResultResponse<Void> of(ResultCode resultCode) {
+        return new ResultResponse<>(resultCode, null);
     }
 
-    public ResultResponse(ResultCode resultCode, Object data) {
+    public ResultResponse(ResultCode resultCode, R data) {
         this.status = resultCode.getStatus();
         this.code = resultCode.getCode();
         this.message = resultCode.getMessage();
