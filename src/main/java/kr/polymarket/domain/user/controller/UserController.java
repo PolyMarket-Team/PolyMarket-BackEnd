@@ -69,7 +69,7 @@ public class UserController {
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
     }
 
-    @ApiOperation(value = "회원 프로필 조회 API", notes = "회원의 프로필 정보, 닉네임,  API")
+    @ApiOperation(value = "회원 프로필 조회 API", notes = "회원의 프로필 정보(사용자 ID, 닉네임, 프로필 이미지 url) API")
     @ApiResponses({
             @ApiResponse(code = 200, message = "success user profile"),
             @ApiResponse(code = 400, message = "bad request", response = ErrorResponse.class),
