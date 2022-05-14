@@ -3,7 +3,7 @@ package kr.polymarket.domain.user.service;
 import kr.polymarket.domain.user.dto.LoginRequestDto;
 import kr.polymarket.domain.user.dto.LoginResponseDto;
 import kr.polymarket.domain.user.dto.TokenResponseDto;
-import kr.polymarket.domain.user.entity.RedisKey;
+import kr.polymarket.domain.user.repository.RedisKeyPrefix;
 import kr.polymarket.domain.user.entity.User;
 import kr.polymarket.domain.user.exception.InvalidRefreshTokenException;
 import kr.polymarket.domain.user.exception.SignInFailureException;
@@ -38,7 +38,8 @@ public class UserAuthService {
             throw new SignInFailureException();
 
         String refreshToken = jwtTokenProvider.createRefreshToken(loginRequestDto.getEmail());
-        redisService.setDataWithExpiration(RedisKey.REFRESH.getKey() + user.getEmail(), refreshToken, JwtTokenProvider.REFRESH_TOKEN_VALID_TIME);
+        redisService.setDataWithExpiration(RedisKeyPrefix.REFRESH.buildKey(user.getEmail()), refreshToken,
+                JwtTokenProvider.REFRESH_TOKEN_VALID_TIME);
         return new LoginResponseDto(user.getId(), jwtTokenProvider.createToken(loginRequestDto.getEmail()), refreshToken);
     }
 
@@ -49,14 +50,15 @@ public class UserAuthService {
     @Transactional
     public TokenResponseDto tokenRefresh(String refreshToken) {
         String email = jwtTokenProvider.getUserEmail(refreshToken);
-        String findRefreshToken = redisService.getData(RedisKey.REFRESH.getKey() + email);
+        String findRefreshToken = redisService.getData(RedisKeyPrefix.REFRESH.buildKey(email));
         if (findRefreshToken == null || !findRefreshToken.equals(refreshToken))
             throw new InvalidRefreshTokenException();
 
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         String newAccessToken = jwtTokenProvider.createToken(user.getEmail());
         String newRefreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
-        redisService.setDataWithExpiration(RedisKey.REFRESH.getKey() + user.getEmail(), refreshToken, JwtTokenProvider.REFRESH_TOKEN_VALID_TIME);
+        redisService.setDataWithExpiration(RedisKeyPrefix.REFRESH.buildKey(user.getEmail()),
+                refreshToken, JwtTokenProvider.REFRESH_TOKEN_VALID_TIME);
 
         return new TokenResponseDto(newAccessToken, newRefreshToken);
     }

@@ -4,6 +4,7 @@ import kr.polymarket.domain.user.dto.SignUpRequestDto;
 import kr.polymarket.domain.user.entity.User;
 import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
 import kr.polymarket.domain.user.exception.EmailNotFoundException;
+import kr.polymarket.domain.user.exception.NicknameAlreadyExistsException;
 import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
 import kr.polymarket.domain.user.repository.EmailRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
@@ -59,7 +60,7 @@ public class UserService {
      */
     public void validateNicknameDuplicationBy(String nickname) {
         if (userRepository.existsByNickname(nickname)) {
-            throw new IllegalStateException("이미 존재하는 닉네임입니다.");
+            throw new NicknameAlreadyExistsException("이미 존재하는 닉네임입니다.");
         }
     }
 

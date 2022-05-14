@@ -37,8 +37,8 @@ public class SwaggerConfig {
     }
 
     private ApiInfo apiInfo() {
-        String description = "User Service API Document";
-        return new ApiInfoBuilder().title("User Service API")
+        String description = "PolyMarket API Document";
+        return new ApiInfoBuilder().title("PolyMarket API")
                 .description(description)
                 .version("0.0.1")
                 .build();

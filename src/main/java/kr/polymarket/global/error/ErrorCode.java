@@ -12,6 +12,7 @@ public enum ErrorCode {
     EMAIL_AUTH_NOT_FOUND(404, "U003", "찾을 수 없는 이메일 인증정보입니다."),
     SIGN_IN_FAIL(401, "U004", "로그인에 실패하였습니다."),
     REFRESH_TOKEN_FAIL(401, "U004", "access token 재발행에 실패했습니다."),
+    NICKNAME_ALREADY_EXISTS(409, "U005", "이미 존재하는 닉네임입니다."),
 
     // Global
     INTERNAL_SERVER_ERROR(500, "G001", "내부 서버 오류입니다."),
