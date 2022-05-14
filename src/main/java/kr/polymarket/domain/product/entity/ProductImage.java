@@ -5,10 +5,11 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name = "product_image")
+@Table(name = "product_file")
 public class ProductImage {
 
     @Id
@@ -21,9 +22,15 @@ public class ProductImage {
     private Product product;
 
     @Column(nullable = false)
-    private Integer imageType;
+    private int file_sequence;
 
     @Column(nullable = false)
-    private String imageUrl;
+    private String fileUrl;
+
+    @Column(nullable = false)
+    private int is_delete;
+
+    @Column(nullable = false)
+    private LocalDateTime createDate;
 
 }
