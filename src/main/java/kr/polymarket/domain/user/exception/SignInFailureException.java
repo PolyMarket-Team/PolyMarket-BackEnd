@@ -6,7 +6,7 @@ import kr.polymarket.global.error.ErrorCode;
 public class SignInFailureException extends BusinessException {
 
     public SignInFailureException() {
-        super(null, ErrorCode.SIGN_IN_FAIL);
+        super(ErrorCode.SIGN_IN_FAIL);
     }
 
     public SignInFailureException(String message) {

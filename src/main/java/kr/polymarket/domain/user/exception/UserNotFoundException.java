@@ -6,7 +6,7 @@ import kr.polymarket.global.error.ErrorCode;
 public class UserNotFoundException extends BusinessException {
 
     public UserNotFoundException() {
-        super(null, ErrorCode.USER_NOT_FOUND);
+        super(ErrorCode.USER_NOT_FOUND);
     }
 
     public UserNotFoundException(String message) {

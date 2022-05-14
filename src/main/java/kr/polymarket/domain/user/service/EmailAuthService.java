@@ -5,7 +5,6 @@ import kr.polymarket.domain.user.dto.EmailAuthResponseDto;
 import kr.polymarket.domain.user.dto.EmailAuthCheckRequestDto;
 import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.repository.RedisKeyPrefix;
-import kr.polymarket.domain.user.exception.EmailAlreadySendException;
 import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
 import kr.polymarket.domain.user.exception.EmailNotFoundException;
 import kr.polymarket.domain.user.exception.UserAlreadySignUpException;

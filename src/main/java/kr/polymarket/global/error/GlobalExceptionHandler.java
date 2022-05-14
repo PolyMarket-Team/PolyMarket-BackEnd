@@ -21,10 +21,8 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static kr.polymarket.global.error.ErrorCode.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -87,7 +85,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, BAD_REQUEST);
     }
 
-    @ExceptionHandler(BusinessException.class)
+    @ExceptionHandler(ErrorCodeException.class)
     protected ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException e) {
         final ErrorCode errorCode = e.getErrorCode();
         final ErrorResponse response = e.getMessage() == null? ErrorResponse.of(errorCode) : ErrorResponse.of(e, errorCode);
