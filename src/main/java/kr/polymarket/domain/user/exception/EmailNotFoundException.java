@@ -6,7 +6,7 @@ import kr.polymarket.global.error.ErrorCode;
 public class EmailNotFoundException extends BusinessException {
 
     public EmailNotFoundException() {
-        super("", ErrorCode.EMAIL_AUTH_NOT_FOUND);
+        super(null, ErrorCode.EMAIL_AUTH_NOT_FOUND);
     }
 
     public EmailNotFoundException(String message, ErrorCode errorCode) {

@@ -90,7 +90,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     protected ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException e) {
         final ErrorCode errorCode = e.getErrorCode();
-        final ErrorResponse response = ErrorResponse.of(e, errorCode);
+        final ErrorResponse response = e.getMessage() == null? ErrorResponse.of(errorCode) : ErrorResponse.of(e, errorCode);
         return new ResponseEntity<>(response, HttpStatus.valueOf(errorCode.getStatus()));
     }
 
