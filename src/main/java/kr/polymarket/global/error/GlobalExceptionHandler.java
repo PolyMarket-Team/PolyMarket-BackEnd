@@ -85,8 +85,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, BAD_REQUEST);
     }
 
-    @ExceptionHandler(ErrorCodeException.class)
+    @ExceptionHandler(BusinessException.class)
     protected ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException e) {
+        final ErrorCode errorCode = e.getErrorCode();
+        final ErrorResponse response = e.getMessage() == null? ErrorResponse.of(errorCode) : ErrorResponse.of(e, errorCode);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(errorCode.getStatus()));
+    }
+
+    @ExceptionHandler(ErrorCodeException.class)
+    protected ResponseEntity<ErrorResponse> handleErrorCodeException(final ErrorCodeException e) {
         final ErrorCode errorCode = e.getErrorCode();
         final ErrorResponse response = e.getMessage() == null? ErrorResponse.of(errorCode) : ErrorResponse.of(e, errorCode);
         return new ResponseEntity<>(response, HttpStatus.valueOf(errorCode.getStatus()));

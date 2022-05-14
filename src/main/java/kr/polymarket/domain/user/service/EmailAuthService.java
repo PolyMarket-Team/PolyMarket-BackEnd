@@ -111,8 +111,8 @@ public class EmailAuthService {
      * 이메일 db에 이메일 저장되어 있는지 확인
      */
     public void emailValidateDuplicated(String email) {
-        if (emailRepository.findByEmail(email).isPresent())
-            throw new EmailAlreadySendException();
+//        if (emailRepository.findByEmail(email).isPresent())
+//            throw new EmailAlreadySendException();
     }
 }
 

@@ -6,6 +6,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    // Common
+    UNAUTHORIZED(401, "C001", "인증되지 않았습니다."),
+    FORBIDDEN(403, "C002", "접권권한이 없습니다."),
+    FILE_NOT_FOUND(404, "C003", "파일을 찾을 수 없습니다."),
+
     // User
     USER_ALREADY_SIGNUP(409, "U001", "이미 가입한 사용자입니다."),
     EMAIL_AUTH_CODE_AUTH_FAIL(401, "U002", "이메일 인증에 실패하였습니다."),

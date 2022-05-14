@@ -1,17 +1,18 @@
 package kr.polymarket.domain.user.controller;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import kr.polymarket.domain.user.dto.*;
 import kr.polymarket.domain.user.service.UserAuthService;
 import kr.polymarket.domain.user.service.UserService;
+import kr.polymarket.global.config.security.jwt.UserDetail;
 import kr.polymarket.global.error.ErrorResponse;
 import kr.polymarket.global.result.ResultCode;
 import kr.polymarket.global.result.ResultResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -61,7 +62,7 @@ public class UserController {
             @ApiResponse(code = 401, message = "unauthorized (token is invalid)", response = ErrorResponse.class),
             @ApiResponse(code = 404, message = "not found", response = ErrorResponse.class),
     })
-    @PostMapping("/refresh")
+    @PostMapping("/token/refresh")
     public ResponseEntity<ResultResponse<TokenResponseDto>> refresh(@RequestHeader("X-REFRESH-TOKEN") String refreshToken) {
         TokenResponseDto tokenResponseDto = userAuthService.tokenRefresh(refreshToken);
 
@@ -75,9 +76,26 @@ public class UserController {
             @ApiResponse(code = 400, message = "bad request", response = ErrorResponse.class),
             @ApiResponse(code = 404, message = "not found", response = ErrorResponse.class),
     })
-    @PostMapping("/{userId}")
+    @GetMapping("/{userId}/profile")
     public ResponseEntity<ResultResponse<UserProfileResponse>> userProfile(@PathVariable long userId) {
         UserProfileResponse userProfileResponse = userService.findUserProfile(userId);
+        ResultResponse<UserProfileResponse> result = ResultResponse.of(ResultCode.SUCCESS, userProfileResponse);
+        return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
+    }
+
+    @ApiOperation(value = "회원 프로필 수정 API", notes = "회원의 프로필 정보(닉네임, 프로필 이미지 url) 수정 API")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "success user profile"),
+            @ApiResponse(code = 400, message = "bad request", response = ErrorResponse.class),
+            @ApiResponse(code = 401, message = "unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 403, message = "forbidden", response = ErrorResponse.class),
+            @ApiResponse(code = 404, message = "not found", response = ErrorResponse.class),
+    })
+    @PutMapping("/{userId}/profile")
+    public ResponseEntity<ResultResponse<UserProfileResponse>> userProfileModify(@PathVariable long userId,
+                                                                                 @AuthenticationPrincipal UserDetails userDetails,
+                                                                                 @Valid @RequestBody UserProfileUpdateRequestDto userProfileUpdateRequest) {
+        UserProfileResponse userProfileResponse = userService.updateUserProfile(userId, userDetails, userProfileUpdateRequest);
         ResultResponse<UserProfileResponse> result = ResultResponse.of(ResultCode.SUCCESS, userProfileResponse);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
     }

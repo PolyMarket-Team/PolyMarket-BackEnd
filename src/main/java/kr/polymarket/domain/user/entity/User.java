@@ -30,7 +30,7 @@ public class User {
     @Column(length = 10, nullable = false)
     private String nickname;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "user")
     private UserFile userFile;
 
     @CreatedDate
