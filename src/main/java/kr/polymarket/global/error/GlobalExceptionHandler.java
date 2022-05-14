@@ -90,13 +90,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     protected ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException e) {
         final ErrorCode errorCode = e.getErrorCode();
-        final ErrorResponse response = ErrorResponse.of(errorCode);
+        final ErrorResponse response = ErrorResponse.of(e, errorCode);
         return new ResponseEntity<>(response, HttpStatus.valueOf(errorCode.getStatus()));
     }
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
-        log.error("{} {} {} {}",request.getRemoteHost(), request.getRemoteAddr(), request.getRequestURI(),
+        log.error("{} {} {}", request.getRemoteAddr(), request.getRequestURI(),
                 request.getHeader("X-Forwarded-For"), e);
 
         sendErrorMessageToSlackWebhookChannel(e, request);
