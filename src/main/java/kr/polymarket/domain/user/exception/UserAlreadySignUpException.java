@@ -6,7 +6,7 @@ import kr.polymarket.global.error.ErrorCode;
 public class UserAlreadySignUpException extends BusinessException {
 
     public UserAlreadySignUpException() {
-        super("", ErrorCode.USER_ALREADY_SIGNUP);
+        super(ErrorCode.USER_ALREADY_SIGNUP);
     }
 
     public UserAlreadySignUpException(String message) {

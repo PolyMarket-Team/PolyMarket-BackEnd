@@ -1,11 +1,10 @@
 package kr.polymarket.domain.user.service;
 
 import kr.polymarket.domain.user.dto.EmailAuthRequestDto;
-import kr.polymarket.domain.user.dto.EmailAuthResultDto;
+import kr.polymarket.domain.user.dto.EmailAuthResponseDto;
 import kr.polymarket.domain.user.dto.EmailAuthCheckRequestDto;
 import kr.polymarket.domain.user.entity.EmailAuth;
 import kr.polymarket.domain.user.repository.RedisKeyPrefix;
-import kr.polymarket.domain.user.exception.EmailAlreadySendException;
 import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
 import kr.polymarket.domain.user.exception.EmailNotFoundException;
 import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
@@ -44,7 +43,7 @@ public class EmailAuthService {
      * 이메일 전송 및 임시 저장
      */
     @Transactional
-    public EmailAuthResultDto sendAuthCodeToEmail(EmailAuthRequestDto emailAuthRequestDto) {
+    public EmailAuthResponseDto sendAuthCodeToEmail(EmailAuthRequestDto emailAuthRequestDto) {
         String authCode = emailUtil.createCode(EMAIL_AUTH_CODE_LENGTH);
         validateSignUpDuplicated(emailAuthRequestDto.getEmail());
 
@@ -52,7 +51,7 @@ public class EmailAuthService {
         if (emailRepository.existsByEmail(emailAuthRequestDto.getEmail())) {
             // TODO 회원가입은 안됐으나 이메일 인증코드를 보낸적이 있는 경우 이메일 재전송까지 시간제한을 걸지 여부 기획
             emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
-            EmailAuthResultDto emailAuthResult = buildEmailAuthResult(emailAuthRequestDto, authCode);
+            EmailAuthResponseDto emailAuthResult = buildEmailAuthResult(emailAuthRequestDto, authCode);
             redisRepository.setDataWithExpiration(RedisKeyPrefix.EMAIL_AUTH_CODE.buildKey(emailAuthRequestDto.getEmail()),
                     authCode,
                     EMAIL_AUTH_EXPIRE_TIME + Duration.ofSeconds(10).toSeconds()); // 정책상 유효기간보다는 10초 더 여유있게 설정
@@ -63,17 +62,17 @@ public class EmailAuthService {
         EmailAuth emailAuth = emailAuthRequestDto.createEmailAuth(emailAuthRequestDto);
         emailRepository.save(emailAuth);
         emailUtil.send(emailAuthRequestDto.getEmail(), authCode);
-        EmailAuthResultDto emailAuthResult = buildEmailAuthResult(emailAuthRequestDto, authCode);
+        EmailAuthResponseDto emailAuthResult = buildEmailAuthResult(emailAuthRequestDto, authCode);
         redisRepository.setDataWithExpiration(RedisKeyPrefix.EMAIL_AUTH_CODE.buildKey(emailAuthRequestDto.getEmail())
                 , authCode
                 , EMAIL_AUTH_EXPIRE_TIME);
         return emailAuthResult ;
     }
 
-    private EmailAuthResultDto buildEmailAuthResult(EmailAuthRequestDto emailAuthRequestDto, String authCode) {
+    private EmailAuthResponseDto buildEmailAuthResult(EmailAuthRequestDto emailAuthRequestDto, String authCode) {
         LocalDateTime expiredDateTime = ZonedDateTime.now(ZoneId.of(SERVER_STANDARD_TIMEZONE)).plus(5, ChronoUnit.MINUTES).toLocalDateTime();
 
-        return EmailAuthResultDto.builder()
+        return EmailAuthResponseDto.builder()
                 .email(emailAuthRequestDto.getEmail())
                 .authCode("prod".equals(appProperty.getEnv())? null: authCode)
                 .expireDateTime(expiredDateTime)
@@ -112,8 +111,8 @@ public class EmailAuthService {
      * 이메일 db에 이메일 저장되어 있는지 확인
      */
     public void emailValidateDuplicated(String email) {
-        if (emailRepository.findByEmail(email).isPresent())
-            throw new EmailAlreadySendException();
+//        if (emailRepository.findByEmail(email).isPresent())
+//            throw new EmailAlreadySendException();
     }
 }
 

@@ -1,20 +1,28 @@
 package kr.polymarket.domain.user.service;
 
 import kr.polymarket.domain.user.dto.SignUpRequestDto;
+import kr.polymarket.domain.user.dto.UserProfileResponse;
+import kr.polymarket.domain.user.dto.UserProfileUpdateRequestDto;
 import kr.polymarket.domain.user.entity.User;
-import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
-import kr.polymarket.domain.user.exception.EmailNotFoundException;
-import kr.polymarket.domain.user.exception.NicknameAlreadyExistsException;
-import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
+import kr.polymarket.domain.user.entity.UserFile;
+import kr.polymarket.domain.user.exception.*;
 import kr.polymarket.domain.user.repository.EmailRepository;
+import kr.polymarket.domain.user.repository.UserFileRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.entity.Verify;
+import kr.polymarket.global.error.ErrorCode;
+import kr.polymarket.global.error.ForbiddenException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
+import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Optional;
 
 
 @Service
@@ -23,6 +31,7 @@ import java.time.LocalDateTime;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserFileRepository userFileRepository;
     private final EmailRepository emailRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -45,6 +54,51 @@ public class UserService {
                         .updateDate(LocalDateTime.now())
                         .build());
     }
+
+    /**
+     * 유저 프로필 정보 조회
+     */
+    public UserProfileResponse findUserProfile(long userId) {
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> { throw new UserNotFoundException("존재하지않는 회원입니다."); });
+
+        return UserProfileResponse.of(findUser);
+    }
+
+    /**
+     * 사용자 프로필 수정
+     */
+    @Transactional
+    public UserProfileResponse updateUserProfile(long userId, UserDetails userDetails, UserProfileUpdateRequestDto userProfileUpdateRequest) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> { throw new UserNotFoundException("존재하지않는 회원입니다."); });
+
+        if(!user.getEmail().equals(userDetails.getUsername())) {
+            throw new ForbiddenException("수정권한이 없는 사용자 입니다.");
+        }
+
+        UserFile userFile = userFileRepository.findByFileIdAndAndIsDelete(userProfileUpdateRequest.getProfileImageFileId(), false)
+                .orElseThrow(() -> { throw new UserFileNotFoundException(ErrorCode.FILE_NOT_FOUND); });
+
+        // 사용자 프로필을 교체하는 경우
+        if(!userFile.equals(user.getUserFile())) {
+            if(!ObjectUtils.isEmpty(userFile.getUser()) && !Objects.equals(userFile.getUser().getId(), user.getId())) {
+                throw new ForbiddenException(String.format("파일에 대한 접근권한이 없습니다. userId: %d, updatedProfileFileId: %d", user.getId(), userFile.getFileId()));
+            }
+
+            UserFile previousUserProfileFile = user.getUserFile();
+            previousUserProfileFile.setUser(null);
+            previousUserProfileFile.setDelete(true);
+
+            user.setUserFile(userFile);
+            userFile.setUser(user);
+        }
+
+        user.setNickname(userProfileUpdateRequest.getNickname());
+
+        return UserProfileResponse.of(user);
+    }
+
 
     /**
      * 회원가입 여부 확인

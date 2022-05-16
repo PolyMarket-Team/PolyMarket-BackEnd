@@ -6,7 +6,7 @@ import kr.polymarket.global.error.ErrorCode;
 public class NicknameAlreadyExistsException extends BusinessException {
 
     public NicknameAlreadyExistsException() {
-        super("", ErrorCode.NICKNAME_ALREADY_EXISTS);
+        super(ErrorCode.NICKNAME_ALREADY_EXISTS);
     }
 
     public NicknameAlreadyExistsException(String message) {
