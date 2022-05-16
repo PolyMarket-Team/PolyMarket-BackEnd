@@ -3,18 +3,15 @@ package kr.polymarket.domain.user.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
-public class EmailAuthResultDto {
+public class EmailAuthResponseDto {
 
     @ApiModelProperty(name = "이메일", notes = "이메일", example = "example@email.com")
     private String email;

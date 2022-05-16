@@ -45,6 +45,17 @@ public class ErrorResponse {
         this.errors = new ArrayList<>();
     }
 
+    private ErrorResponse(Exception exception, final ErrorCode code) {
+        this.message = exception.getMessage();
+        this.status = code.getStatus();
+        this.code = code.getCode();
+        this.errors = new ArrayList<>();
+    }
+
+    public static ErrorResponse of(final Exception exception,final ErrorCode code) {
+        return new ErrorResponse(exception, code);
+    }
+
     public static ErrorResponse of(final ErrorCode code, final BindingResult bindingResult) {
         return new ErrorResponse(code, FieldError.of(bindingResult));
     }

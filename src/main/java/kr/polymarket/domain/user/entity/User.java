@@ -24,11 +24,14 @@ public class User {
     @Column(length = 100, nullable = false, unique = true)
     private String email;
 
-    @Column(length = 300)
+    @Column(length = 300, nullable = false)
     private String password;
 
-    @Column(length = 10)
+    @Column(length = 10, nullable = false)
     private String nickname;
+
+    @OneToOne(mappedBy = "user")
+    private UserFile userFile;
 
     @CreatedDate
     @Column(nullable = false)

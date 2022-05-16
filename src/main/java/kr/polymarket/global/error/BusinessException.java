@@ -1,15 +1,13 @@
 package kr.polymarket.global.error;
 
-public class BusinessException extends RuntimeException {
+public class BusinessException extends ErrorCodeException {
 
-    private final ErrorCode errorCode;
+    public BusinessException(ErrorCode errorCode) {
+        super(errorCode);
+    }
 
     public BusinessException(String message, ErrorCode errorCode) {
-        super(message);
-        this.errorCode = errorCode;
+        super(message, errorCode);
     }
 
-    public ErrorCode getErrorCode() {
-        return errorCode;
-    }
 }

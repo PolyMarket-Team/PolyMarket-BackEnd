@@ -21,10 +21,8 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static kr.polymarket.global.error.ErrorCode.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -90,13 +88,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     protected ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException e) {
         final ErrorCode errorCode = e.getErrorCode();
-        final ErrorResponse response = ErrorResponse.of(errorCode);
+        final ErrorResponse response = e.getMessage() == null? ErrorResponse.of(errorCode) : ErrorResponse.of(e, errorCode);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(errorCode.getStatus()));
+    }
+
+    @ExceptionHandler(ErrorCodeException.class)
+    protected ResponseEntity<ErrorResponse> handleErrorCodeException(final ErrorCodeException e) {
+        final ErrorCode errorCode = e.getErrorCode();
+        final ErrorResponse response = e.getMessage() == null? ErrorResponse.of(errorCode) : ErrorResponse.of(e, errorCode);
         return new ResponseEntity<>(response, HttpStatus.valueOf(errorCode.getStatus()));
     }
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
-        log.error("{} {} {} {}",request.getRemoteHost(), request.getRemoteAddr(), request.getRequestURI(),
+        log.error("{} {} {}", request.getRemoteAddr(), request.getRequestURI(),
                 request.getHeader("X-Forwarded-For"), e);
 
         sendErrorMessageToSlackWebhookChannel(e, request);
