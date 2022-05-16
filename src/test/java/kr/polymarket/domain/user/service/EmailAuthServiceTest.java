@@ -9,6 +9,7 @@ import kr.polymarket.domain.user.exception.EmailAuthCodeAuthFailureException;
 import kr.polymarket.domain.user.exception.EmailNotFoundException;
 import kr.polymarket.domain.user.exception.UserAlreadySignUpException;
 import kr.polymarket.domain.user.repository.EmailRepository;
+import kr.polymarket.domain.user.repository.RedisKeyPrefix;
 import kr.polymarket.domain.user.repository.RedisRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
 import kr.polymarket.domain.user.util.EmailUtil;
@@ -142,7 +143,8 @@ public class EmailAuthServiceTest {
                 .authCode(authCode)
                 .build();
 
-        given(redisRepository.getData(email)).willReturn("WrongAuthCode");
+        given(redisRepository.getData(RedisKeyPrefix.EMAIL_AUTH_CODE.buildKey(emailCodeRequestDto.getEmail())))
+                .willReturn("WrongAuthCode");
 
         // when
         Throwable exception = catchThrowable(() -> emailAuthService.confirmEmailAuthCode(emailCodeRequestDto));
@@ -162,7 +164,8 @@ public class EmailAuthServiceTest {
                 .authCode(authCode)
                 .build();
 
-        given(redisRepository.getData(email)).willReturn(authCode);
+        given(redisRepository.getData(RedisKeyPrefix.EMAIL_AUTH_CODE.buildKey(emailCodeRequestDto.getEmail())))
+                .willReturn(authCode);
 
         // when
         Throwable exception = catchThrowable(() -> emailAuthService.confirmEmailAuthCode(emailCodeRequestDto));
@@ -182,7 +185,8 @@ public class EmailAuthServiceTest {
                 .authCode(authCode)
                 .build();
 
-        given(redisRepository.getData(email)).willReturn(authCode);
+        given(redisRepository.getData(RedisKeyPrefix.EMAIL_AUTH_CODE.buildKey(emailCodeRequestDto.getEmail())))
+                .willReturn(authCode);
         given(emailRepository.findByEmail(email)).willReturn(Optional.of(EmailAuth.builder().build()));
 
         // when
