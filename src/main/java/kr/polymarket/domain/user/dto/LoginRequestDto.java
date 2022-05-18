@@ -24,6 +24,7 @@ public class LoginRequestDto {
     @Pattern(regexp ="^(?=.*[A-Za-z])(?=.*\\d)(?=.*[~!@#$%^&*()+|=])[A-Za-z\\d~!@#$%^&*()+|=]{8,20}$",
             message = "비밀번호는 특수문자, 영어, 숫자가 모두 포함되어야합니다.")
     @Length(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하여야 합니다.")
+    @NotBlank(message = "패스워드를 입력해주세요")
     @ApiModelProperty(name = "패스워드", notes = "패스워드(특수문자, 영어, 숫자가 모두 포함)", required = true, example = "q1w2e3r4!@#")
     private String password;
 }
