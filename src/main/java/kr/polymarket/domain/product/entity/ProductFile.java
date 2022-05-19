@@ -21,9 +21,8 @@ public class ProductFile extends FileBaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Product product;
 
-    @Column()
+    @Column
     private int file_sequence;
 }
