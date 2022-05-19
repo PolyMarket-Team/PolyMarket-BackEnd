@@ -35,7 +35,7 @@ public class S3Uploader {
      * 2. 파일 사이즈 제한 얼마나 할 것인가? 단위 : 픽셀(당근마켓은 제한 없음)
      */
 
-    public List<String> uploadProductImage(List<MultipartFile> multipartFile) {
+    public List<String> uploadImage(List<MultipartFile> multipartFile) {
         List<String> fileUrlList = new ArrayList<>();
 
         multipartFile.forEach(file -> {

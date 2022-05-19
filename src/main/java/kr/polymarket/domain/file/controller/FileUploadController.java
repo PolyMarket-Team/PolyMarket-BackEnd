@@ -34,7 +34,7 @@ public class FileUploadController {
             @ApiResponse(code = 400, message = "bad request", response = ErrorResponse.class),
             @ApiResponse(code = 401, message = "unauthorized", response = ErrorResponse.class),
     })
-    @PostMapping("/upload/profile")
+    @PostMapping("/upload/profileimage")
     public ResponseEntity<ResultResponse<Long>> uploadImage(@RequestPart("image") MultipartFile multipartFile) {
         Long fileId = imageUploadService.uploadUserProfileImage(multipartFile);
 

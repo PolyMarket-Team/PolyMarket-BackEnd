@@ -39,24 +39,26 @@ public class ImageUploadService {
     }
 
     /**
-     * input
-     *
      * @param multipartFile
-     * @return save 결과 저장내용
+     * @return fileUrlList
      */
     @Transactional
     public List<String> uploadProductImage(List<MultipartFile> multipartFile) {
-        List<String> fileUrlList = s3Uploader.uploadProductImage(multipartFile);
+        List<String> fileUrlList = s3Uploader.uploadImage(multipartFile);
 
-        for (String productFileUrl : fileUrlList) {
+        fileUrlList.forEach(fileUrl -> {
             productFileRepository.save(
                     ProductFile.builder()
-                            .fileUrl(productFileUrl)
+                            .fileUrl(fileUrl)
                             .createDate(LocalDateTime.now())
                             .isDelete(false)
                             .build()
             );
-        }
+        });
         return fileUrlList;
     }
 }
+
+
+
+
