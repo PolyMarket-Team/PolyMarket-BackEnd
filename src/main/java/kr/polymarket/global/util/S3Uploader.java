@@ -11,16 +11,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
-
-
 
 @Component
 @RequiredArgsConstructor
@@ -31,18 +26,21 @@ public class S3Uploader {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    @Value("${cloud.aws.s3.url}")
+    private String awsUrl;
+
     /**
      * 정책 고려사항
      * 1. 파일 확장자, 실제 파일타입 일치 여부
      * 2. 파일 사이즈 제한 얼마나 할 것인가? 단위 : 픽셀(당근마켓은 제한 없음)
      */
 
-    public List<String> uploadImage(List<MultipartFile> multipartFile)  {
+    public List<String> uploadProductImage(List<MultipartFile> multipartFile) {
         List<String> fileUrlList = new ArrayList<>();
 
         multipartFile.forEach(file -> {
             String fileName = createFileName(file.getOriginalFilename());
-            String fileUrl = "https://polymarket-bucket.s3.ap-northeast-2.amazonaws.com/" + fileName;
+            String fileUrl = awsUrl + fileName;
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentLength(file.getSize());
             objectMetadata.setContentType(file.getContentType());
@@ -61,7 +59,7 @@ public class S3Uploader {
 
     public String uploadImage(MultipartFile file) {
         String fileName = createFileName(file.getOriginalFilename());
-        String fileUrl = "https://polymarket-bucket.s3.ap-northeast-2.amazonaws.com/" + fileName;
+        String fileUrl = awsUrl + fileName;
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(file.getSize());
         objectMetadata.setContentType(file.getContentType());
@@ -88,3 +86,4 @@ public class S3Uploader {
         }
     }
 }
+
