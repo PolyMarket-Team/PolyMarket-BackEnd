@@ -1,21 +1,21 @@
 package kr.polymarket.domain.user.entity;
 
 
+import kr.polymarket.domain.DateBaseEntity;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+
 
 @Entity
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @Table(name = "`user`")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class User {
+public class User extends DateBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,15 +32,6 @@ public class User {
 
     @OneToOne(mappedBy = "user")
     private UserFile userFile;
-
-    @CreatedDate
-    @Column(nullable = false)
-    private LocalDateTime createDate;
-
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updateDate;
-
 
 }
 
