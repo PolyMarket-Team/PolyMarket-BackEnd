@@ -2,19 +2,17 @@ package kr.polymarket.domain.user.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
 @ApiModel(description = "로그인 응답 모델")
 public class LoginResponseDto {
 
     @ApiModelProperty(name = "사용자 ID", notes = "사용자 식별자", example = "1")
-    private Long id;
+    private Long userId;
 
     @ApiModelProperty(name = "access token",
             notes = "인증이 필요한 API 요청시 Header(X-AUTH-TOKEN) 에 첨부해서 보내는 인증용 jwt access token",
