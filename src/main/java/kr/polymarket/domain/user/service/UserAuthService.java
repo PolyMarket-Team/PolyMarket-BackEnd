@@ -40,7 +40,11 @@ public class UserAuthService {
         String refreshToken = jwtTokenProvider.createRefreshToken(loginRequestDto.getEmail());
         redisService.setDataWithExpiration(RedisKeyPrefix.REFRESH.buildKey(user.getEmail()), refreshToken,
                 JwtTokenProvider.REFRESH_TOKEN_VALID_TIME);
-        return new LoginResponseDto(user.getId(), jwtTokenProvider.createToken(loginRequestDto.getEmail()), refreshToken);
+        return LoginResponseDto.builder()
+                .userId(user.getId())
+                .accessToken(jwtTokenProvider.createToken(loginRequestDto.getEmail()))
+                .refreshToken(refreshToken)
+                .build();
     }
 
     /**
