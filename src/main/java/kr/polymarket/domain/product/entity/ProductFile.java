@@ -24,5 +24,5 @@ public class ProductFile extends FileBaseEntity {
     private Product product;
 
     @Column
-    private int file_sequence;
+    private Integer fileSequence;
 }
