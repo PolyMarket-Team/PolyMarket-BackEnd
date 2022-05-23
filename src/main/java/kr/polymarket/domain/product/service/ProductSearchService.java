@@ -30,7 +30,8 @@ public class ProductSearchService {
      */
     public ProductSearchResult searchProductList(ProductSearchRequestDto productSearchRequest) throws IOException {
         SearchWithPITResult searchWithPITResult = productSearchCustomRepository.searchProductIdList(productSearchRequest.getQuery(),
-                productSearchRequest.getCategory().getId(), productSearchRequest.getPage(), productSearchRequest.getPit());
+                productSearchRequest.getCategory() == null ? null : productSearchRequest.getCategory().getId(),
+                productSearchRequest.getPage(), productSearchRequest.getPit());
 
         List<Product> productList = productRepository.findProductsByIdIn(searchWithPITResult.getRetrievedProductIdList());
         return ProductSearchResult.builder()

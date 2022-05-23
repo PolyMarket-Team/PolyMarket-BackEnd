@@ -1,6 +1,8 @@
 package kr.polymarket.domain.product.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import kr.polymarket.domain.product.document.Product;
 import kr.polymarket.domain.product.dto.SearchWithPITResult;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
@@ -73,17 +76,19 @@ public class ProductSearchCustomRepository implements ProductSearchRepository{
         );
 
         // 검색 쿼리 생성 및 검색요청
-        SearchRequest searchRequest = new SearchRequest();
+        BoolQueryBuilder boolQueryBuilder = boolQuery()
+                .should(QueryBuilders.multiMatchQuery(query).field("product_title",2).field("product_content",1))
+                .should(QueryBuilders.matchPhraseQuery("product_title", query).slop(1));
+        if(categoryId != null) {
+            boolQueryBuilder.filter(QueryBuilders.matchQuery("category_id", categoryId));
+        }
+
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder
-                .fetchSource(new String[]{"_id"}, new String[]{})
+                .fetchSource(new String[]{"id"}, new String[]{})
                 .query(
                     functionScoreQuery(
-                            boolQuery()
-                                    .filter(QueryBuilders.matchQuery("category_id", categoryId))
-                                    .should(QueryBuilders.multiMatchQuery(query).field("product_title",2).field("product_content",1))
-                                    .should(QueryBuilders.matchPhraseQuery("product_title", query).slop(1))
-                            ,
+                            boolQueryBuilder,
                             filterFunctionBuilderList.toArray(new FunctionScoreQueryBuilder.FilterFunctionBuilder[0])
                     )
                     .boostMode(CombineFunction.MULTIPLY)
@@ -96,13 +101,16 @@ public class ProductSearchCustomRepository implements ProductSearchRepository{
         final PointInTimeBuilder pointInTimeBuilder = new PointInTimeBuilder(pit);
         pointInTimeBuilder.setKeepAlive(PIT_KEEP_ALIVE);
         searchSourceBuilder.pointInTimeBuilder(pointInTimeBuilder);
+
+        SearchRequest searchRequest = new SearchRequest();
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 
         // 검색결과에서 상품 아이디 추출
         List<Long> retrievedProductIdList =  Arrays.stream(searchResponse.getHits().getHits())
-                .map(SearchHit::getId)
-                .map(Long::valueOf)
+                .filter(h -> h.getScore() > 0.0f)
+                .map(SearchHit::getSourceAsString)
+                .map(s -> new Gson().fromJson(s, Product.class).getId())
                 .collect(Collectors.toList());
 
         return SearchWithPITResult.builder()

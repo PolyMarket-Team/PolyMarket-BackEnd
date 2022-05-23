@@ -23,7 +23,7 @@ public class ProductSearchRequestDto {
     @ApiParam(value = "검색어: 상풍의 제목과 내용기반으로 검색", required = true, example = "아이폰 12")
     private String query;
 
-    @ApiParam(value = "상품 카테고리", example = "HOME_APPLIANCES")
+    @ApiParam(value = "상품 카테고리(요청이 없는 경우 전체 카테고리에 대해서 검색)", example = "HOME_APPLIANCES")
     private ProductCategory category;
 
     @Range(min = 0, max = 20, message = "페이지 번호는 0 이상 20 이하이어야 합니다.")
