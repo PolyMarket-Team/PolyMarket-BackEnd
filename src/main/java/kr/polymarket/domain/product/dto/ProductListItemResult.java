@@ -72,4 +72,21 @@ public class ProductListItemResult {
                 .build();
     }
 
+    public static ProductListItemResult of(Product product, String mainImageUrl) {
+        return ProductListItemResult.builder()
+                .id(product.getId())
+                .title(product.getTitle())
+                .price(product.getPrice())
+                .category(product.getCategory())
+                .wishNum(product.getWishNum())
+                .viewNum(product.getViewNum())
+                .chatNum(product.getChatNum())
+                .status(product.getStatus())
+                .userId(product.getUser().getId())
+                .createDate(product.getCreateDate())
+                .updateDate(product.getUpdateDate())
+                .mainImageUrl(mainImageUrl)
+                .build();
+    }
+
 }

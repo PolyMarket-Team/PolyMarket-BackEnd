@@ -36,7 +36,10 @@ public class ProductSearchService {
         List<Product> productList = productRepository.findProductsByIdIn(searchWithPITResult.getRetrievedProductIdList());
         return ProductSearchResult.builder()
                 .pit(searchWithPITResult.getPit())
-                .productResultList(productList.stream().map(ProductListItemResult::of).collect(Collectors.toList()))
+                .productResultList(productList.stream()
+                        .map(ProductListItemResult::of)
+                        .collect(Collectors.toList())
+                )
                 .build();
     }
 }
