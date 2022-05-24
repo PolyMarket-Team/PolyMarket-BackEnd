@@ -1,6 +1,8 @@
 package kr.polymarket.domain.product.entity;
 
 import kr.polymarket.domain.DateBaseEntity;
+import kr.polymarket.domain.product.dto.CreateProductArticleDto;
+import kr.polymarket.domain.product.dto.ProductArticleDetailDto;
 import kr.polymarket.domain.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,8 +13,10 @@ import org.hibernate.annotations.OnDeleteAction;
 
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuperBuilder
 @Entity(name = "product")
@@ -37,17 +41,18 @@ public class Product extends DateBaseEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(nullable = false, name = "product_wish_num")
+    @Column(name = "product_wish_num")
     private int wishNum;
 
     @Column(nullable = false, name = "product_view_num")
     private int viewNum;
 
-    @Column(nullable = false, name = "product_chat_num")
+    @Column(name = "product_chat_num")
     private int chatNum;
 
     @Column(nullable = false, name = "product_status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final List<ProductFile> productFileList = new ArrayList<>();
@@ -55,4 +60,28 @@ public class Product extends DateBaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public static Product createProductArticle(long userId, CreateProductArticleDto createProductArticleDto, Category category) {
+        return Product.builder()
+                .title(createProductArticleDto.getTitle())
+                .content(createProductArticleDto.getContent())
+                .price(createProductArticleDto.getPrice())
+                .viewNum(0)
+                .wishNum(0)
+                .category(category)
+                .createDate(LocalDateTime.now())
+                .updateDate(LocalDateTime.now())
+                .status(ProductStatus.NORMAL)
+                .build();
+    }
+
+    public ProductArticleDetailDto toProductArticleDetail(){
+        return ProductArticleDetailDto.builder()
+                .title(this.getTitle())
+                .category(this.getCategory().getName())
+                .price(this.getPrice())
+                .content(this.getContent())
+                .productFileList(this.getProductFileList().stream().map(ProductFile::getFileId).collect(Collectors.toList()))
+                .build();
+    }
 }
