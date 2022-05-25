@@ -20,6 +20,9 @@ public enum ErrorCode {
     NICKNAME_ALREADY_EXISTS(409, "U005", "이미 존재하는 닉네임입니다."),
     USER_NOT_FOUND(404, "U006", "탈퇴하거나 존재하지않는 회원입니다."),
 
+    // Product
+    PRODUCT_NOT_FOUND(403, "D001", "파일을 찾을 수 없습니다"),
+
     // Global
     INTERNAL_SERVER_ERROR(500, "G001", "내부 서버 오류입니다."),
     METHOD_NOT_ALLOWED(405, "G002", "허용되지 않은 HTTP method입니다."),
