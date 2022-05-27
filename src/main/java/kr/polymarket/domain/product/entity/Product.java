@@ -47,7 +47,8 @@ public class Product extends DateBaseEntity {
     private int chatNum;
 
     @Column(nullable = false, name = "product_status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private final List<ProductFile> productFileList = new ArrayList<>();

@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import kr.polymarket.domain.product.document.Product;
 import kr.polymarket.domain.product.dto.SearchWithPITResult;
+import kr.polymarket.domain.product.exception.SearchNotFoundException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.util.EntityUtils;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Request;
@@ -21,6 +23,7 @@ import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.PointInTimeBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -39,7 +42,7 @@ public class ProductSearchCustomRepository implements ProductSearchRepository{
     private final RestHighLevelClient restHighLevelClient;
     private final ObjectMapper objectMapper;
 
-    private static final String PIT_KEEP_ALIVE = "1m"; // pit 유지시간, 연장시간 기준, 1분
+    private static final String PIT_KEEP_ALIVE = "2m"; // pit 유지시간, 연장시간 기준, 2분
 
     /**
      * 상품 키워드로 elasticsearch에 검색하는 메소드
@@ -104,7 +107,15 @@ public class ProductSearchCustomRepository implements ProductSearchRepository{
 
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse searchResponse = null;
+        try {
+            searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        } catch(ElasticsearchStatusException e) {
+            if (HttpStatus.NOT_FOUND.value() == e.status().getStatus()) {
+                throw new SearchNotFoundException();
+            }
+            throw e;
+        }
 
         // 검색결과에서 상품 아이디 추출
         List<Long> retrievedProductIdList =  Arrays.stream(searchResponse.getHits().getHits())
