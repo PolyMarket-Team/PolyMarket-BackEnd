@@ -38,9 +38,6 @@ public class ProductListItemResult {
     @ApiModelProperty(name = "상품 채팅수", notes = "상품 채팅수", example = "5")
     private Integer chatNum;
 
-    @ApiModelProperty(name = "상품 상태", notes = "상품 상태", example = "판매중")
-    private String status;
-
     @ApiModelProperty(name = "상품 메인이미지 url", notes = "상품 메인이미지 url", example = "https://polymarket-bucket.s3.ap-northeast-2.amazonaws.com/5Fs23OEk2310ASskBx.jpg")
     private String mainImageUrl;
 
@@ -64,7 +61,6 @@ public class ProductListItemResult {
                 .wishNum(product.getWishNum())
                 .viewNum(product.getViewNum())
                 .chatNum(product.getChatNum())
-                .status(product.getStatus())
                 .userId(product.getUser().getId())
                 .createDate(product.getCreateDate())
                 .updateDate(product.getUpdateDate())
