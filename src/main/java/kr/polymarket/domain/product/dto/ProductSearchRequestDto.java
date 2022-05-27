@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 /**
  * 상품 검색 요청 dto
@@ -24,7 +25,7 @@ public class ProductSearchRequestDto {
     private String query;
 
     @ApiParam(value = "상품 카테고리(요청이 없는 경우 전체 카테고리에 대해서 검색)", example = "HOME_APPLIANCES")
-    private ProductCategory category;
+    private List<ProductCategory> categoryList;
 
     @Range(min = 0, max = 20, message = "페이지 번호는 0 이상 20 이하이어야 합니다.")
     @ApiParam(value = "페이지(최대 20페이지까지 지원), 디폴트 값: 0", example = "2")
