@@ -35,6 +35,10 @@ public class ProductSearchRequestDto {
             example = "39K1AwEScHJvZHVjdF9zZWFyY2hfaWR4FjJZMzZVUXBvUzVpVzNodWIyZ2VZQmcAFkhnVTRsMTlNU3EtUURXeEt5amdlWlEAAAAAAAAAEYQWMlotLUltV1ZTVy1rWG9BcE5rdVh0UQABFjJZMzZVUXBvUzVpVzNodWIyZ2VZQmcAAA==")
     private String pit;
 
+    public void setDefaultPage() {
+        this.page = 0;
+    }
+
     @Getter
     @RequiredArgsConstructor
     public enum ProductCategory {

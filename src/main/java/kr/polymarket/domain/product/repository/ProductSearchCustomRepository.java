@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import kr.polymarket.domain.product.document.Product;
 import kr.polymarket.domain.product.dto.SearchWithPITResult;
+import kr.polymarket.domain.product.entity.ProductStatus;
 import kr.polymarket.domain.product.exception.SearchNotFoundException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -88,6 +89,7 @@ public class ProductSearchCustomRepository implements ProductSearchRepository{
                 categoryFilterBoolQueryBuilder.should(matchQuery("category_id", categoryId));
             });
             boolQueryBuilder.filter(categoryFilterBoolQueryBuilder);
+            boolQueryBuilder.filter(matchQuery("product_status", ProductStatus.NORMAL.name()));
         }
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();

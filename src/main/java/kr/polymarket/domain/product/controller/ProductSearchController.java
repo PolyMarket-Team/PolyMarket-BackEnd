@@ -33,6 +33,9 @@ public class ProductSearchController {
     })
     @GetMapping(path = "/search/product")
     public ResponseEntity<ResultResponse<ProductSearchResult>> search(@Valid ProductSearchRequestDto searchRequest) throws IOException {
+        if(searchRequest.getPage() == null) {
+            searchRequest.setDefaultPage();
+        }
         ProductSearchResult searchResult = productSearchService.searchProductList(searchRequest);
         ResultResponse<ProductSearchResult> result = ResultResponse.of(ResultCode.SUCCESS, searchResult);
         return ResponseEntity.status(result.getStatus())
