@@ -20,8 +20,6 @@ public class JwtTokenProvider {
     @Value("${spring.jwt.secretKey}")
     private String secretKey;
 
-    private final UserDetailService userDetailService;
-
     public static final long TOKEN_VALID_TIME = 30 * 60 * 1000L; // 30분
     public static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60 * 60 * 24 * 7; // 7일
     public static final String ACCESS_TOKEN_HEADER_NAME = "X-AUTH-TOKEN";
@@ -74,7 +72,9 @@ public class JwtTokenProvider {
 
     //토큰을 통해 인증 객체를 얻는다
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailService.loadUserByUsername(getUserEmail(token));
+        UserDetails userDetails = UserDetail.builder()
+                                            .email(getUserEmail(token))
+                                            .build();
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
