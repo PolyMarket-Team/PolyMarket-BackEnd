@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 /**
  * 상품 검색 요청 dto
@@ -24,7 +25,7 @@ public class ProductSearchRequestDto {
     private String query;
 
     @ApiParam(value = "상품 카테고리(요청이 없는 경우 전체 카테고리에 대해서 검색)", example = "HOME_APPLIANCES")
-    private ProductCategory category;
+    private List<ProductCategory> categoryList;
 
     @Range(min = 0, max = 20, message = "페이지 번호는 0 이상 20 이하이어야 합니다.")
     @ApiParam(value = "페이지(최대 20페이지까지 지원), 디폴트 값: 0", example = "2")
@@ -33,6 +34,10 @@ public class ProductSearchRequestDto {
     @ApiParam(value = "PIT(Point In Time): 검색 시점 기준 값, 검색 페이징을 위한 스냅샷 아이디 @@ 주의: 첫번째 페이지 요청시에는 빈값으로 요청",
             example = "39K1AwEScHJvZHVjdF9zZWFyY2hfaWR4FjJZMzZVUXBvUzVpVzNodWIyZ2VZQmcAFkhnVTRsMTlNU3EtUURXeEt5amdlWlEAAAAAAAAAEYQWMlotLUltV1ZTVy1rWG9BcE5rdVh0UQABFjJZMzZVUXBvUzVpVzNodWIyZ2VZQmcAAA==")
     private String pit;
+
+    public void setDefaultPage() {
+        this.page = 0;
+    }
 
     @Getter
     @RequiredArgsConstructor

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import kr.polymarket.domain.product.document.Product;
 import kr.polymarket.domain.product.dto.SearchWithPITResult;
+import kr.polymarket.domain.product.entity.ProductStatus;
 import kr.polymarket.domain.product.exception.SearchNotFoundException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -25,14 +26,14 @@ import org.elasticsearch.search.builder.PointInTimeBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
-import static org.elasticsearch.index.query.QueryBuilders.functionScoreQuery;
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 @Slf4j
 @Repository
@@ -47,13 +48,13 @@ public class ProductSearchCustomRepository implements ProductSearchRepository{
     /**
      * 상품 키워드로 elasticsearch에 검색하는 메소드
      * @param query
-     * @param categoryId
+     * @param categoryIdList
      * @param page
      * @param pit
      * @return
      * @throws IOException
      */
-    public SearchWithPITResult searchProductIdList(String query, Integer categoryId, int page, String pit) throws IOException {
+    public SearchWithPITResult searchProductIdList(String query, List<Integer> categoryIdList, int page, String pit) throws IOException {
         // score function filter: 오래된 문서일 수록 낮은 점수를 주도록 가중치 부여
         List<FunctionScoreQueryBuilder.FilterFunctionBuilder> filterFunctionBuilderList = List.of(
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
@@ -80,10 +81,15 @@ public class ProductSearchCustomRepository implements ProductSearchRepository{
 
         // 검색 쿼리 생성 및 검색요청
         BoolQueryBuilder boolQueryBuilder = boolQuery()
-                .should(QueryBuilders.multiMatchQuery(query).field("product_title",2).field("product_content",1))
-                .should(QueryBuilders.matchPhraseQuery("product_title", query).slop(1));
-        if(categoryId != null) {
-            boolQueryBuilder.filter(QueryBuilders.matchQuery("category_id", categoryId));
+                .should(multiMatchQuery(query).field("product_title",2).field("product_content",1))
+                .should(matchPhraseQuery("product_title", query).slop(1));
+        if(!CollectionUtils.isEmpty(categoryIdList)) {
+            BoolQueryBuilder categoryFilterBoolQueryBuilder = boolQuery();
+            categoryIdList.forEach(categoryId -> {
+                categoryFilterBoolQueryBuilder.should(matchQuery("category_id", categoryId));
+            });
+            boolQueryBuilder.filter(categoryFilterBoolQueryBuilder);
+            boolQueryBuilder.filter(matchQuery("product_status", ProductStatus.NORMAL.name()));
         }
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
