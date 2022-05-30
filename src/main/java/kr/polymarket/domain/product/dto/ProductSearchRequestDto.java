@@ -66,4 +66,5 @@ public class ProductSearchRequestDto {
         private final Integer id;
 
     }
+
 }
