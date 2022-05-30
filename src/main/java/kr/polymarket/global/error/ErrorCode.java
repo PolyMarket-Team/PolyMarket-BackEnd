@@ -21,7 +21,8 @@ public enum ErrorCode {
     USER_NOT_FOUND(404, "U006", "탈퇴하거나 존재하지않는 회원입니다."),
 
     // Product
-    PRODUCT_NOT_FOUND(403, "D001", "파일을 찾을 수 없습니다"),
+    PRODUCT_NOT_FOUND(403, "D001", "상품을 찾을 수 없습니다"),
+    PRODUCTFILE_SIZE_NOT_CORRESPOND(400, "D002", "파일 사이즈가 일치하지 않습니다."),
 
     // Global
     INTERNAL_SERVER_ERROR(500, "G001", "내부 서버 오류입니다."),

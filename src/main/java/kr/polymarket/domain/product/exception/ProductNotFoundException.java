@@ -12,4 +12,5 @@ public class ProductNotFoundException extends BusinessException {
     public ProductNotFoundException(String message, ErrorCode errorCode) {
         super(message, ErrorCode.PRODUCT_NOT_FOUND);
     }
+
 }

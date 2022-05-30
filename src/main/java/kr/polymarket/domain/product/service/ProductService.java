@@ -4,65 +4,85 @@ import kr.polymarket.domain.product.dto.CreateProductArticleDto;
 import kr.polymarket.domain.product.dto.ProductArticleDetailDto;
 import kr.polymarket.domain.product.entity.Category;
 import kr.polymarket.domain.product.entity.Product;
-import kr.polymarket.domain.product.exception.CategoryNotFoundException;
+import kr.polymarket.domain.product.entity.ProductFile;
+import kr.polymarket.domain.product.entity.ProductStatus;
+import kr.polymarket.domain.product.exception.ProductFileSizeNotCorrespondException;
 import kr.polymarket.domain.product.exception.ProductNotFoundException;
 import kr.polymarket.domain.product.repository.CategoryRepository;
+import kr.polymarket.domain.product.repository.ProductFileRepository;
 import kr.polymarket.domain.product.repository.ProductRepository;
+import kr.polymarket.domain.user.entity.User;
+import kr.polymarket.domain.user.exception.UserNotFoundException;
+import kr.polymarket.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Transactional
 @RequiredArgsConstructor
 @Service
 public class ProductService {
 
-    private final CategoryRepository categoryRepository;
+    private final ProductFileRepository productFileRepository;
     private final ProductRepository productRepository;
-
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
     /**
      * 상품등록
      * @param productArticleDto
-     * @param userId
+     * @param
      * @return
      */
-    public long createProductArticle(CreateProductArticleDto productArticleDto, long userId) {
-        //2 카테고리 저장
+    public long createProductArticle(CreateProductArticleDto productArticleDto, UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> { throw new UserNotFoundException("존재하지않는 회원입니다."); });
+
+        List<ProductFile> findProductFileList = productFileRepository.findAllById(productArticleDto.getFileIdList());
+        if (findProductFileList.size() != productArticleDto.getFileIdList().size()) {
+            throw new ProductFileSizeNotCorrespondException();
+        }
 
         Category category = categoryRepository.findById(productArticleDto.getCategoryId())
-                .orElseThrow(CategoryNotFoundException::new);
-        //3 정보들 주입 객체생성
-        Product product = Product.createProductArticle(userId, productArticleDto, category);
-        //4 이미지랑 연관관계 매핑
+                .orElseThrow(() -> { throw new IllegalStateException("카테고리가 존재하지 않습니다."); });
 
-        //
+        Product product = Product.createProductArticle(user, productArticleDto, category);
         productRepository.save(product);
-        //7 결과 리턴
+
+        findProductFileList.forEach(productFile -> {
+            productFile.setFileSequence(findProductFileList.indexOf(productFile) + 1);
+            productFile.setProduct(product);
+        });
+
         return product.getId();
     }
 
-    /** TODO
-     *
+    /**
+     * TODO
      * 상품 조회
      */
     @Transactional(readOnly = true)
-    public ProductArticleDetailDto productDetail(long Id) {
+    public ProductArticleDetailDto productArticleDetail(long Id) {
         Product product = productRepository.findProductDetailById(Id)
-                .orElseThrow(() -> {
-                    throw new ProductNotFoundException();
-                });
+                .orElseThrow(() -> { throw new ProductNotFoundException(); });
+
+        if(product.getStatus() == ProductStatus.DELETE)
+            throw new ProductNotFoundException();
+
         return product.toProductArticleDetail();
     }
-
-
-
 
     /**
      * 상품 삭제
      */
 
+
+
     /**
      * 상품 수정
+     * todo 수정할 때 이미 있던 파일들 싹다 isDelete 처리하기
      */
 }

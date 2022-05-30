@@ -1,10 +1,7 @@
 package kr.polymarket.domain.product.entity;
 
 import kr.polymarket.domain.FileBaseEntity;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
@@ -12,6 +9,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "product_file")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @SuperBuilder
@@ -22,5 +20,5 @@ public class ProductFile extends FileBaseEntity {
     private Product product;
 
     @Column
-    private int file_sequence;
+    private int fileSequence;
 }

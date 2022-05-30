@@ -7,10 +7,8 @@ import kr.polymarket.domain.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -21,6 +19,7 @@ import java.util.stream.Collectors;
 @SuperBuilder
 @Entity(name = "product")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product extends DateBaseEntity {
 
@@ -58,16 +57,18 @@ public class Product extends DateBaseEntity {
     private final List<ProductFile> productFileList = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    public static Product createProductArticle(long userId, CreateProductArticleDto createProductArticleDto, Category category) {
+    public static Product createProductArticle(User user, CreateProductArticleDto createProductArticleDto, Category category) {
         return Product.builder()
                 .title(createProductArticleDto.getTitle())
                 .content(createProductArticleDto.getContent())
                 .price(createProductArticleDto.getPrice())
                 .viewNum(0)
                 .wishNum(0)
+                .chatNum(0)
+                .user(user)
                 .category(category)
                 .createDate(LocalDateTime.now())
                 .updateDate(LocalDateTime.now())
@@ -75,13 +76,16 @@ public class Product extends DateBaseEntity {
                 .build();
     }
 
-    public ProductArticleDetailDto toProductArticleDetail(){
+    public ProductArticleDetailDto toProductArticleDetail() {
         return ProductArticleDetailDto.builder()
                 .title(this.getTitle())
                 .category(this.getCategory().getName())
                 .price(this.getPrice())
                 .content(this.getContent())
-                .productFileList(this.getProductFileList().stream().map(ProductFile::getFileId).collect(Collectors.toList()))
+                .productFileList(this.getProductFileList().stream().map(ProductFile::getFileUrl).collect(Collectors.toList()))
+                .viewNum(this.getViewNum())
+                .chatNum(this.getChatNum())
+                .wishNum(this.getWishNum())
                 .build();
     }
 }
