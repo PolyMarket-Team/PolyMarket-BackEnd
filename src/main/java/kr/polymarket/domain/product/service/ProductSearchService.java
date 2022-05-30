@@ -10,8 +10,10 @@ import kr.polymarket.domain.product.repository.ProductSearchCustomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +32,11 @@ public class ProductSearchService {
      */
     public ProductSearchResult searchProductList(ProductSearchRequestDto productSearchRequest) throws IOException {
         SearchWithPITResult searchWithPITResult = productSearchCustomRepository.searchProductIdList(productSearchRequest.getQuery(),
-                productSearchRequest.getCategory() == null ? null : productSearchRequest.getCategory().getId(),
+                CollectionUtils.isEmpty(productSearchRequest.getCategoryList()) ?
+                        Collections.emptyList() :
+                        productSearchRequest.getCategoryList().stream()
+                                .map(ProductSearchRequestDto.ProductCategory::getId)
+                                .collect(Collectors.toList()),
                 productSearchRequest.getPage(), productSearchRequest.getPit());
 
         List<Product> productList = productRepository.findProductsByIdIn(searchWithPITResult.getRetrievedProductIdList());
