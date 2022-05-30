@@ -77,7 +77,6 @@ public class ProductListItemResult {
                 .wishNum(product.getWishNum())
                 .viewNum(product.getViewNum())
                 .chatNum(product.getChatNum())
-                .status(product.getStatus())
                 .userId(product.getUser().getId())
                 .createDate(product.getCreateDate())
                 .updateDate(product.getUpdateDate())
