@@ -3,8 +3,8 @@ package kr.polymarket.domain.product.controller;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import kr.polymarket.domain.product.dto.CreateProductArticleDto;
-import kr.polymarket.domain.product.dto.ProductArticleDetailDto;
+import kr.polymarket.domain.product.dto.CreateProductArticleRequestDto;
+import kr.polymarket.domain.product.dto.ProductArticleDetailResponseDto;
 import kr.polymarket.domain.product.service.ProductService;
 import kr.polymarket.global.error.ErrorResponse;
 import kr.polymarket.global.result.ResultCode;
@@ -31,9 +31,9 @@ public class ProductController {
             @ApiResponse(code = 401, message = "unauthorized", response = ErrorResponse.class),
     })
     @PostMapping("/products")
-    public ResponseEntity<ResultResponse<Long>> createProductArticle(@RequestBody @Valid CreateProductArticleDto productArticleDto,
+    public ResponseEntity<ResultResponse<Long>> createProductArticle(@RequestBody @Valid CreateProductArticleRequestDto productArticle,
                                                                      @AuthenticationPrincipal UserDetails userDetails) {
-        Long productId = productService.createProductArticle(productArticleDto, userDetails);
+        Long productId = productService.createProductArticle(productArticle, userDetails);
 
         ResultResponse<Long> result = ResultResponse.of(ResultCode.PRODUCT_ARTICLE_UPLOAD_SUCCESS,productId);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
@@ -46,10 +46,10 @@ public class ProductController {
             @ApiResponse(code = 401, message = "unauthorized", response = ErrorResponse.class),
     })
     @GetMapping("/products/{id}")
-    public ResponseEntity<ResultResponse<ProductArticleDetailDto>> productArticleDetail(@PathVariable Long id) {
-        ProductArticleDetailDto productArticleDetail = productService.productArticleDetail(id);
+    public ResponseEntity<ResultResponse<ProductArticleDetailResponseDto>> productArticleDetail(@PathVariable Long id) {
+        ProductArticleDetailResponseDto productArticleDetail = productService.productArticleDetail(id);
 
-        ResultResponse<ProductArticleDetailDto> result = ResultResponse.of(ResultCode.SUCCESS, productArticleDetail);
+        ResultResponse<ProductArticleDetailResponseDto> result = ResultResponse.of(ResultCode.SUCCESS, productArticleDetail);
         return new ResponseEntity<>(result, HttpStatus.valueOf(result.getStatus()));
         }
     }

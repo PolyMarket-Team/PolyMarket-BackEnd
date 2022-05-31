@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @ApiModel(value = "게시글 생성")
 @Builder
-public class CreateProductArticleDto {
+public class CreateProductArticleRequestDto {
 
     @ApiModelProperty(name = "글 제목", notes = "상품 글 제목")
     @NotBlank(message = "글 제목을 입력해주세요.")

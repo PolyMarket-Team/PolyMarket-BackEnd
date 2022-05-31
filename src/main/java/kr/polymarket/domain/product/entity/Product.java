@@ -1,8 +1,8 @@
 package kr.polymarket.domain.product.entity;
 
 import kr.polymarket.domain.DateBaseEntity;
-import kr.polymarket.domain.product.dto.CreateProductArticleDto;
-import kr.polymarket.domain.product.dto.ProductArticleDetailDto;
+import kr.polymarket.domain.product.dto.CreateProductArticleRequestDto;
+import kr.polymarket.domain.product.dto.ProductArticleDetailResponseDto;
 import kr.polymarket.domain.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -60,7 +60,7 @@ public class Product extends DateBaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public static Product createProductArticle(User user, CreateProductArticleDto createProductArticleDto, Category category) {
+    public static Product createProductArticle(User user, CreateProductArticleRequestDto createProductArticleDto, Category category) {
         return Product.builder()
                 .title(createProductArticleDto.getTitle())
                 .content(createProductArticleDto.getContent())
@@ -76,8 +76,8 @@ public class Product extends DateBaseEntity {
                 .build();
     }
 
-    public ProductArticleDetailDto toProductArticleDetail() {
-        return ProductArticleDetailDto.builder()
+    public ProductArticleDetailResponseDto toProductArticleDetail() {
+        return ProductArticleDetailResponseDto.builder()
                 .title(this.getTitle())
                 .category(this.getCategory().getName())
                 .price(this.getPrice())
