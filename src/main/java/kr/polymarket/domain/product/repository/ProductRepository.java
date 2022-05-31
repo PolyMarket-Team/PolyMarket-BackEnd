@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query("select p from product p join fetch p.category join fetch p.productFileList join fetch p.user where p.id = :id")
+    @Query("select p from product p join fetch p.category join fetch p.productFileList join fetch p.user where p.id = :id and p.status <> kr.polymarket.domain.product.entity.ProductStatus.DELETE")
     Optional<Product> findProductDetailById(Long id);
 }

@@ -1,11 +1,10 @@
 package kr.polymarket.domain.product.service;
 
-import kr.polymarket.domain.product.dto.CreateProductArticleDto;
-import kr.polymarket.domain.product.dto.ProductArticleDetailDto;
+import kr.polymarket.domain.product.dto.CreateProductArticleRequestDto;
+import kr.polymarket.domain.product.dto.ProductArticleDetailResponseDto;
 import kr.polymarket.domain.product.entity.Category;
 import kr.polymarket.domain.product.entity.Product;
 import kr.polymarket.domain.product.entity.ProductFile;
-import kr.polymarket.domain.product.entity.ProductStatus;
 import kr.polymarket.domain.product.exception.ProductFileSizeNotCorrespondException;
 import kr.polymarket.domain.product.exception.ProductNotFoundException;
 import kr.polymarket.domain.product.repository.CategoryRepository;
@@ -37,7 +36,7 @@ public class ProductService {
      * @param
      * @return
      */
-    public long createProductArticle(CreateProductArticleDto productArticleDto, UserDetails userDetails) {
+    public long createProductArticle(CreateProductArticleRequestDto productArticleDto, UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> { throw new UserNotFoundException("존재하지않는 회원입니다."); });
 
@@ -65,12 +64,9 @@ public class ProductService {
      * 상품 조회
      */
     @Transactional(readOnly = true)
-    public ProductArticleDetailDto productArticleDetail(long Id) {
+    public ProductArticleDetailResponseDto productArticleDetail(long Id) {
         Product product = productRepository.findProductDetailById(Id)
                 .orElseThrow(() -> { throw new ProductNotFoundException(); });
-
-        if(product.getStatus() == ProductStatus.DELETE)
-            throw new ProductNotFoundException();
 
         return product.toProductArticleDetail();
     }
