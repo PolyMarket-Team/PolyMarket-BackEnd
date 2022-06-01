@@ -2,10 +2,11 @@ package kr.polymarket.domain.product.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import io.swagger.annotations.ApiParam;
+import kr.polymarket.domain.product.entity.Product;
+import kr.polymarket.domain.user.dto.UserProfileResponse;
+import kr.polymarket.domain.user.entity.User;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
@@ -32,11 +33,12 @@ public class CreateProductArticleRequestDto {
     @ApiModelProperty(name = "상품가격", notes = "상품가격")
     private Integer price;
 
-    @ApiModelProperty(name = "카테고리 아이디", notes = "카테고리 아이디")
-    @NotNull(message = "카테고리 아이디를 입력해주세요.")
-    private Integer categoryId;
+    @ApiParam(value = "상품 카테고리", example = "HOME_APPLIANCES")
+    @NotNull(message = "카테고리를 선택해주세요.")
+    private ProductCategory productCategory;
 
     @ApiModelProperty(name = "상품 이미지 파일 아이디")
     private List<Long> fileIdList;
 
 }
+
