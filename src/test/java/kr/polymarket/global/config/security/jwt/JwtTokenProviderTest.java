@@ -36,10 +36,10 @@ public class JwtTokenProviderTest {
     void access_token_생성_및_파싱_테스트() {
         // given
         final String email = "test@email.com";
-        String accessToken = jwtTokenProvider.createToken(email);
+        JwtClaimSet accessToken = jwtTokenProvider.createToken(email);
 
         // when
-        String parsedEmail = jwtTokenProvider.getUserEmail(accessToken);
+        String parsedEmail = jwtTokenProvider.getUserEmail(accessToken.getToken());
 
         // then
         assertThat(parsedEmail).isEqualTo(email);
@@ -49,10 +49,10 @@ public class JwtTokenProviderTest {
     void refresh_token_생성_테스트() {
         // given
         final String email = "test@email.com";
-        String refreshToken = jwtTokenProvider.createRefreshToken(email);
+        JwtClaimSet refreshToken = jwtTokenProvider.createRefreshToken(email);
 
         // when
-        String parsedEmail = jwtTokenProvider.getUserEmail(refreshToken);
+        String parsedEmail = jwtTokenProvider.getUserEmail(refreshToken.getToken());
 
         // then
         assertThat(parsedEmail).isEqualTo(email);
