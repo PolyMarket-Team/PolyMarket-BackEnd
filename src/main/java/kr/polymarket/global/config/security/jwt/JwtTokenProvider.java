@@ -20,8 +20,6 @@ public class JwtTokenProvider {
     @Value("${spring.jwt.secretKey}")
     private String secretKey;
 
-    private final UserDetailService userDetailService;
-
     public static final long TOKEN_VALID_TIME = 30 * 60 * 1000L; // 30분
     public static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60 * 60 * 24 * 7; // 7일
     public static final String ACCESS_TOKEN_HEADER_NAME = "X-AUTH-TOKEN";
@@ -37,34 +35,46 @@ public class JwtTokenProvider {
     }
 
     // 토큰 키는 중복되지않는 값인 email로 지정, H512알고리즘 적용, 토큰유표시간 설정(발급순간부터 30분)
-    public String createToken(String email) {
-        Claims claims = Jwts.claims().setSubject(email);
+    public JwtClaimSet createToken(String email) {
         Date now = new Date();
-
-        return Jwts.builder()
-                .setClaims(claims)
+        Claims claims = Jwts.claims()
+                .setSubject(email)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + TOKEN_VALID_TIME))
-                .signWith(SignatureAlgorithm.HS512, secretKey)
-                .compact();
+                .setExpiration(new Date(now.getTime() + TOKEN_VALID_TIME));
+
+        return JwtClaimSet.builder()
+                .token(Jwts.builder()
+                        .setClaims(claims)
+                        .signWith(SignatureAlgorithm.HS512, secretKey)
+                        .compact()
+                )
+                .claims(claims)
+                .build();
     }
 
-    public String createRefreshToken(String email) {
-        Claims claims = Jwts.claims().setSubject(email);
+    public JwtClaimSet createRefreshToken(String email) {
         Date now = new Date();
-
-        return Jwts.builder()
-                .setClaims(claims)
+        Claims claims = Jwts.claims()
+                .setSubject(email)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME))
-                .signWith(SignatureAlgorithm.HS512, secretKey)
-                .compact();
+                .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME));
+
+        return JwtClaimSet.builder()
+                .token(Jwts.builder()
+                        .setClaims(claims)
+                        .signWith(SignatureAlgorithm.HS512, secretKey)
+                        .compact()
+                )
+                .claims(claims)
+                .build();
     }
 
 
     //토큰을 통해 인증 객체를 얻는다
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailService.loadUserByUsername(getUserEmail(token));
+        UserDetails userDetails = UserDetail.builder()
+                                            .email(getUserEmail(token))
+                                            .build();
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 

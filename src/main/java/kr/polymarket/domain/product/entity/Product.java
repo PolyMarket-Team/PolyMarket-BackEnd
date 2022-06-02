@@ -3,12 +3,16 @@ package kr.polymarket.domain.product.entity;
 import kr.polymarket.domain.DateBaseEntity;
 import kr.polymarket.domain.product.dto.CreateProductArticleRequestDto;
 import kr.polymarket.domain.product.dto.ProductArticleDetailResponseDto;
+import kr.polymarket.domain.product.dto.ProductCategory;
+import kr.polymarket.domain.product.dto.ProductListItemResult;
 import kr.polymarket.domain.user.entity.User;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -17,10 +21,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SuperBuilder
-@Entity(name = "product")
+@Entity
+@Table(name = "product")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Product extends DateBaseEntity {
 
     @Id
@@ -79,7 +85,7 @@ public class Product extends DateBaseEntity {
     public ProductArticleDetailResponseDto toProductArticleDetail() {
         return ProductArticleDetailResponseDto.builder()
                 .title(this.getTitle())
-                .category(this.getCategory().getName())
+                .category(this.getCategory())
                 .price(this.getPrice())
                 .content(this.getContent())
                 .productFileList(this.getProductFileList().stream().map(ProductFile::getFileUrl).collect(Collectors.toList()))
