@@ -4,7 +4,6 @@ import io.swagger.annotations.*;
 import kr.polymarket.domain.user.dto.*;
 import kr.polymarket.domain.user.service.UserAuthService;
 import kr.polymarket.domain.user.service.UserService;
-import kr.polymarket.global.config.security.jwt.UserDetail;
 import kr.polymarket.global.error.ErrorResponse;
 import kr.polymarket.global.result.ResultCode;
 import kr.polymarket.global.result.ResultResponse;

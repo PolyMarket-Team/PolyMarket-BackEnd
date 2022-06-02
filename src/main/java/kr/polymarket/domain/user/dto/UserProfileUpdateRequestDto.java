@@ -21,7 +21,7 @@ public class UserProfileUpdateRequestDto {
     @NotBlank(message = "별명을 입력해주세요")
     private String nickname;
 
-    @ApiModelProperty(name = "파일 아이디", notes = "파일 아이디(POST /file/upload/profileimage API 응답값으로 받은 파일 아이디)", example = "99999")
+    @ApiModelProperty(name = "사용자 ID", notes = "사용자 ID", example = "99999")
     @NotNull(message = "프로필 이미지 파일아이디를 반드시 입력해야합니다.")
     @Range(min = 1, message = "파일아이디는 반드시 1이상이어야합니다.")
     private Long profileImageFileId;

@@ -30,7 +30,7 @@ public class User extends DateBaseEntity {
     @Column(length = 10, nullable = false)
     private String nickname;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user")
     private UserFile userFile;
 
 }

@@ -13,7 +13,6 @@ import kr.polymarket.domain.user.entity.Verify;
 import kr.polymarket.global.error.ErrorCode;
 import kr.polymarket.global.error.ForbiddenException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
-@Slf4j
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -71,14 +70,14 @@ public class UserService {
      */
     @Transactional
     public UserProfileResponse updateUserProfile(long userId, UserDetails userDetails, UserProfileUpdateRequestDto userProfileUpdateRequest) {
-        User user = userRepository.findWithUserFileById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> { throw new UserNotFoundException("존재하지않는 회원입니다."); });
 
         if(!user.getEmail().equals(userDetails.getUsername())) {
             throw new ForbiddenException("수정권한이 없는 사용자 입니다.");
         }
 
-        UserFile userFile = userFileRepository.findByFileId(userProfileUpdateRequest.getProfileImageFileId(), false)
+        UserFile userFile = userFileRepository.findByFileIdAndAndIsDelete(userProfileUpdateRequest.getProfileImageFileId(), false)
                 .orElseThrow(() -> { throw new UserFileNotFoundException(ErrorCode.FILE_NOT_FOUND); });
 
         // 사용자 프로필을 교체하는 경우
@@ -88,10 +87,8 @@ public class UserService {
             }
 
             UserFile previousUserProfileFile = user.getUserFile();
-            if(previousUserProfileFile != null) {
-                previousUserProfileFile.setUser(null);
-                previousUserProfileFile.setDelete(true);
-            }
+            previousUserProfileFile.setUser(null);
+            previousUserProfileFile.setDelete(true);
 
             user.setUserFile(userFile);
             userFile.setUser(user);

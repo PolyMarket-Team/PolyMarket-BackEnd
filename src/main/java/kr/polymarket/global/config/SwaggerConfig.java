@@ -29,8 +29,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static springfox.documentation.builders.PathSelectors.regex;
-
 @Configuration
 public class SwaggerConfig {
 
@@ -44,7 +42,7 @@ public class SwaggerConfig {
                 .groupName("apiV1")
 
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("kr.polymarket"))
+                .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo());

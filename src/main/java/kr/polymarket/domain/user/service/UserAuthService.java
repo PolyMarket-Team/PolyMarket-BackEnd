@@ -3,22 +3,18 @@ package kr.polymarket.domain.user.service;
 import kr.polymarket.domain.user.dto.LoginRequestDto;
 import kr.polymarket.domain.user.dto.LoginResponseDto;
 import kr.polymarket.domain.user.dto.TokenResponseDto;
+import kr.polymarket.domain.user.repository.RedisKeyPrefix;
 import kr.polymarket.domain.user.entity.User;
 import kr.polymarket.domain.user.exception.InvalidRefreshTokenException;
 import kr.polymarket.domain.user.exception.SignInFailureException;
 import kr.polymarket.domain.user.exception.UserNotFoundException;
-import kr.polymarket.domain.user.repository.RedisKeyPrefix;
 import kr.polymarket.domain.user.repository.RedisRepository;
 import kr.polymarket.domain.user.repository.UserRepository;
-import kr.polymarket.global.config.security.jwt.JwtClaimSet;
 import kr.polymarket.global.config.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 @Service
 @RequiredArgsConstructor
@@ -41,20 +37,13 @@ public class UserAuthService {
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword()))
             throw new SignInFailureException();
 
-        // access token 생성
-        JwtClaimSet accessTokenSet = jwtTokenProvider.createToken(loginRequestDto.getEmail());
-
-        // refresh token 생성 및 저장
-        JwtClaimSet refreshTokenSet = jwtTokenProvider.createRefreshToken(loginRequestDto.getEmail());
-        redisService.setDataWithExpiration(RedisKeyPrefix.REFRESH.buildKey(user.getEmail()), refreshTokenSet.getToken(),
+        String refreshToken = jwtTokenProvider.createRefreshToken(loginRequestDto.getEmail());
+        redisService.setDataWithExpiration(RedisKeyPrefix.REFRESH.buildKey(user.getEmail()), refreshToken,
                 JwtTokenProvider.REFRESH_TOKEN_VALID_TIME);
-
         return LoginResponseDto.builder()
                 .userId(user.getId())
-                .accessToken(accessTokenSet.getToken())
-                .refreshToken(refreshTokenSet.getToken())
-                .accessTokenExpiryDateTime(accessTokenSet.getClaims().getExpiration().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-                .refreshTokenExpiryDateTime(refreshTokenSet.getClaims().getExpiration().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+                .accessToken(jwtTokenProvider.createToken(loginRequestDto.getEmail()))
+                .refreshToken(refreshToken)
                 .build();
     }
 
@@ -70,21 +59,12 @@ public class UserAuthService {
             throw new InvalidRefreshTokenException();
 
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-
-        // 새로운 access token 발급
-        JwtClaimSet newAccessTokenSet = jwtTokenProvider.createToken(user.getEmail());
-
-        // 새로운 refresh token 발급 및 저장
-        JwtClaimSet newRefreshTokenSet = jwtTokenProvider.createRefreshToken(user.getEmail());
+        String newAccessToken = jwtTokenProvider.createToken(user.getEmail());
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
         redisService.setDataWithExpiration(RedisKeyPrefix.REFRESH.buildKey(user.getEmail()),
                 refreshToken, JwtTokenProvider.REFRESH_TOKEN_VALID_TIME);
 
-        return TokenResponseDto.builder()
-                .accessToken(newAccessTokenSet.getToken())
-                .refreshToken(newRefreshTokenSet.getToken())
-                .accessTokenExpiryDateTime(newAccessTokenSet.getClaims().getExpiration().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-                .refreshTokenExpiryDateTime(newRefreshTokenSet.getClaims().getExpiration().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-                .build();
+        return new TokenResponseDto(newAccessToken, newRefreshToken);
     }
 }
 
