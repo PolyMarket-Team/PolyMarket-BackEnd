@@ -3,6 +3,7 @@ package kr.polymarket.domain.user.service;
 import kr.polymarket.domain.user.dto.LoginRequestDto;
 import kr.polymarket.domain.user.dto.LoginResponseDto;
 import kr.polymarket.domain.user.dto.TokenResponseDto;
+import kr.polymarket.domain.user.dto.UserProfileResponse;
 import kr.polymarket.domain.user.entity.User;
 import kr.polymarket.domain.user.exception.InvalidRefreshTokenException;
 import kr.polymarket.domain.user.exception.SignInFailureException;
@@ -50,7 +51,7 @@ public class UserAuthService {
                 JwtTokenProvider.REFRESH_TOKEN_VALID_TIME);
 
         return LoginResponseDto.builder()
-                .userId(user.getId())
+                .userProfile(UserProfileResponse.of(user))
                 .accessToken(accessTokenSet.getToken())
                 .refreshToken(refreshTokenSet.getToken())
                 .accessTokenExpiryDateTime(accessTokenSet.getClaims().getExpiration().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
