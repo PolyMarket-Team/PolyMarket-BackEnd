@@ -22,9 +22,6 @@ public class ChatMessageDto {
     @ApiModelProperty(name = "채팅내용", notes = "채팅내용")
     private String content;
 
-    @ApiModelProperty(name = "채팅 수신유저 Id", notes = "채팅 수신유저 Id")
-    private Long receiverId;
-
     @ApiModelProperty(name = "채팅 보낸 날짜", notes = "채팅 보낸 날짜")
     private String createDate;
 

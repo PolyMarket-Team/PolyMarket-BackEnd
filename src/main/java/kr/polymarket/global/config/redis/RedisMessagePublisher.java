@@ -3,7 +3,9 @@ package kr.polymarket.global.config.redis;
 import kr.polymarket.domain.chat.dto.ChatMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 
+@Component
 @RequiredArgsConstructor
 public class RedisMessagePublisher {
 
