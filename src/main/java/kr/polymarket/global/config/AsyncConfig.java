@@ -34,7 +34,6 @@ public class AsyncConfig extends AsyncConfigurerSupport {
      * - 스레드 대기큐 제한 x (비동기 작업 요청을 exception 없이 가용할때까지 받음)
      * @return Executor
      */
-    @Primary
     @Bean
     public AsyncListenableTaskExecutor threadPoolTaskExecutor () {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
