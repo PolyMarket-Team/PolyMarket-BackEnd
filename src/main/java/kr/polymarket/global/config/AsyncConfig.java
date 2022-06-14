@@ -10,6 +10,7 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurerSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -33,6 +34,7 @@ public class AsyncConfig extends AsyncConfigurerSupport {
      * - 스레드 대기큐 제한 x (비동기 작업 요청을 exception 없이 가용할때까지 받음)
      * @return Executor
      */
+    @Primary
     @Bean
     public AsyncListenableTaskExecutor threadPoolTaskExecutor () {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

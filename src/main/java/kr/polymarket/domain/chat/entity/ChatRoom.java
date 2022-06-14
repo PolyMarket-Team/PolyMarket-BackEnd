@@ -3,6 +3,7 @@ package kr.polymarket.domain.chat.entity;
 import kr.polymarket.domain.product.entity.Product;
 import kr.polymarket.domain.user.entity.User;
 import lombok.*;
+import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
@@ -25,11 +26,13 @@ public class ChatRoom {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user1_id")
-    private User user1Id;
+    @Comment("상품글 주인")
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user2_id")
-    private User user2Id;
+    @Comment("채팅을 요청한 유저")
+    private User sendUser;
 
     @CreatedDate
     private LocalDateTime createDate;
