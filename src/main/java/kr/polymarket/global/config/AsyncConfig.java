@@ -10,6 +10,7 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurerSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -39,6 +40,17 @@ public class AsyncConfig extends AsyncConfigurerSupport {
         executor.setCorePoolSize(60);
         executor.setMaxPoolSize(60);
         executor.setThreadNamePrefix("async-"); // 스레드 풀 내부의 스레드 이름 접두사(prefix) 설정
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean
+    @Primary
+    public AsyncListenableTaskExecutor webSocketThreadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(100);
+        executor.setMaxPoolSize(100);
+        executor.setThreadNamePrefix("async-");
         executor.initialize();
         return executor;
     }

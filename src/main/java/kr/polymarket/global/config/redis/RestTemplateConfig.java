@@ -1,4 +1,4 @@
-package kr.polymarket.global.config;
+package kr.polymarket.global.config.redis;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
